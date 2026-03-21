@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
   // Ouverture de la base de données dès le chargement de l'app
   const request = indexedDB.open('myDatabase', 1);
 
@@ -20,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
   request.onerror = function (event) {
     console.log('Erreur d\'ouverture de la base de données', event);
   };
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(() => console.log("Service Worker enregistré"));
+  }
+
   // Tab element declarations
   const tabDailyNotes = document.getElementById('tab-daily-nots');
   const tabDiet = document.getElementById('tab-diet');

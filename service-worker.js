@@ -1,30 +1,21 @@
+const CACHE_NAME = "app-cache-v1";
+
+const urlsToCache = [
+  "/",
+  "/index.html",
+  "/app.js",
+];
+
 self.addEventListener("install", event => {
-  console.log("Service Worker installé");
-
-  // Liste des fichiers à mettre en cache
-  const cacheFiles = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/app.js',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png',
-  ];
-
-  // Mettre en cache pendant l'installation
   event.waitUntil(
-    caches.open('my-cache-v1').then(cache => {
-      console.log('Fichiers en cache');
-      return cache.addAll(cacheFiles);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
 self.addEventListener("fetch", event => {
-  // Récupérer la ressource du cache si l'utilisateur est hors ligne
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request); // Cherche la ressource, sinon utilise le cache
-    })
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   );
 });

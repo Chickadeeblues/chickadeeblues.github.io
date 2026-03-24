@@ -1,64 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Ouverture de la base de données dès le chargement de l'app
-  const request = indexedDB.open('myDatabase', 1);
-
-  request.onsuccess = function (event) {
-    const db = event.target.result;
-
-    // Créer une transaction et accéder à un object store
-    const transaction = db.transaction('users', 'readwrite');
-    const store = transaction.objectStore('users');
-
-    // Ajouter ou mettre à jour un utilisateur
-    store.put({ id: 1, name: 'John', age: 30 });
-
-    transaction.oncomplete = function () {
-      console.log('Données ajoutées');
-    };
-  };
-
-  request.onerror = function (event) {
-    console.log('Erreur d\'ouverture de la base de données', event);
-  };
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/service-worker.js")
-      .then(() => console.log("Service Worker enregistré"));
-  }
-
   // Tab element declarations
-  const tabDailyNotes = document.getElementById('tab-daily-nots');
+  const tabDailyNotes = document.getElementById('tab-daily-notes');
   const tabDiet = document.getElementById('tab-diet');
   const tabSettings = document.getElementById('tab-settings');
   const tabHistory = document.getElementById('tab-history');
-
-  // Fonction pour ouvrir la base de données et ajouter des données
-  function addUserData() {
-    const request = indexedDB.open('myDatabase', 1);
-
-    request.onsuccess = function (event) {
-      const db = event.target.result;
-
-      // Créer une transaction et accéder à un object store
-      const transaction = db.transaction('users', 'readwrite');
-      const store = transaction.objectStore('users');
-
-      // Ajouter ou mettre à jour un utilisateur
-      store.put({ id: 1, name: 'John', age: 30 });
-
-      transaction.oncomplete = function () {
-        console.log('Données ajoutées');
-      };
-    };
-
-    request.onerror = function (event) {
-      console.log('Erreur d\'ouverture de la base de données', event);
-    };
-  }
-
-  // Exemple d'appel de la fonction à un moment donné (par exemple, après un clic sur un bouton)
-  document.getElementById("addButton").addEventListener("click", addUserData);
 
   // --- NAVIGATION ---
   function switchToTab(targetId) {
@@ -89,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Data Setup
-  const moodOptions = ["Heureuse", "Confiante", "Sexy", "Stressée", "Anxieuse", "Déprimée", "Irritable", "Déconcentrée"];
+  const moodOptions = ["Heureuse", "Confiante", "Stressée", "Anxieuse", "Déprimée", "Irritable", "Déconcentrée"];
   const predefinedSymptoms = ["Crampes utérines", "Douleurs lombaires", "Jambes lourdes", "Nausées", "Constipation", "Diarrhée"];
 
   let userSettings = JSON.parse(localStorage.getItem('endocute_userSettings')) || null;
@@ -125,318 +70,759 @@ document.addEventListener('DOMContentLoaded', () => {
     return entry;
   }
 
-  // --- DIET DATABASE ---
-  console.log('--- ENDOCUTE APP V2 LOADED ---');
-  const foodDatabase = [
-    { name: "Ananas", type: "anti-inflammatoire" },
-    { name: "Avocat", type: "anti-inflammatoire" },
-    { name: "Amande", type: "anti-inflammatoire" },
-    { name: "Abricot", type: "neutre" },
-    { name: "Banane", type: "neutre" },
-    { name: "Brocoli", type: "anti-inflammatoire" },
-    { name: "Boeuf", type: "pro-inflammatoire" },
-    { name: "Carotte", type: "anti-inflammatoire" },
-    { name: "Citron", type: "anti-inflammatoire" },
-    { name: "Courgette", type: "neutre" },
-    { name: "Chou", type: "anti-inflammatoire" },
-    { name: "Canard", type: "pro-inflammatoire" },
-    { name: "Dinde", type: "neutre" },
-    { name: "Epinard", type: "anti-inflammatoire" },
-    { name: "Fraise", type: "anti-inflammatoire" },
-    { name: "Haricot vert", type: "neutre" },
-    { name: "Kiwi", type: "anti-inflammatoire" },
-    { name: "Lentilles", type: "neutre" },
-    { name: "Mangue", type: "neutre" },
-    { name: "Maïs", type: "pro-inflammatoire" },
-    { name: "Orange", type: "anti-inflammatoire" },
-    { name: "Oignon", type: "anti-inflammatoire" },
-    { name: "Oeuf", type: "neutre" },
-    { name: "Pomme", type: "anti-inflammatoire" },
-    { name: "Poulet", type: "neutre" },
-    { name: "Porc", type: "pro-inflammatoire" },
-    { name: "Poisson (Saumon)", type: "anti-inflammatoire" },
-    { name: "Pâtes", type: "pro-inflammatoire" },
-    { name: "Pomme de terre", type: "neutre" },
-    { name: "Quinoa", type: "anti-inflammatoire" },
-    { name: "Riz blanc", type: "neutre" },
-    { name: "Riz complet", type: "anti-inflammatoire" },
-    { name: "Tomate", type: "neutre" },
-    { name: "Tofu", type: "anti-inflammatoire" },
-    { name: "Yogourt", type: "pro-inflammatoire" },
-    // BOISSONS
-    { name: "Eau", type: "anti-inflammatoire" },
-    { name: "Tisane gingembre", type: "anti-inflammatoire" },
-    { name: "Tisane menthe", type: "anti-inflammatoire" },
-    { name: "Tisane", type: "anti-inflammatoire" },
-    { name: "Lupin", type: "anti-inflammatoire" },
-    { name: "Thé vert", type: "anti-inflammatoire" },
-    { name: "Thé noir", type: "neutre" },
-    { name: "Jus de fruit frais", type: "neutre" },
-    { name: "Café", type: "pro-inflammatoire" },
-    { name: "Alcool", type: "pro-inflammatoire" },
-    { name: "Vin", type: "pro-inflammatoire" },
-    { name: "Bière", type: "pro-inflammatoire" },
-    { name: "Soda", type: "pro-inflammatoire" },
-    { name: "Jus de fruit (industriel)", type: "pro-inflammatoire" },
-    // AJOUTS RÉCENTS
-    { name: "Pâtes (complètes)", type: "neutre" },
-    { name: "Chou-fleur", type: "pro-inflammatoire" },
-    { name: "Brocoli", type: "pro-inflammatoire" },
-    { name: "Champignons", type: "pro-inflammatoire" },
-    { name: "Pois chiches", type: "pro-inflammatoire" },
-    { name: "Gingembre", type: "anti-inflammatoire" },
-    { name: "Curcuma", type: "anti-inflammatoire" }
-  ];
+// DATABASE ALIMENTATION
+const foodDatabase = [
+  // Légume
+  { name: "Ail (cuit)", type: "pro-inflammatoire", legume: true },
+  { name: "Ail (cru)", type: "inflammatoire", legume: true },
+  { name: "Artichaut", type: "anti-inflammatoire", legume: true },
+  { name: "Asperge", type: "anti-inflammatoire", legume: true },
+  { name: "Aubergine", type: "anti-inflammatoire", legume: true },
+  { name: "Avocat", type: "anti-inflammatoire", omega3: true, legume: true },
+  { name: "Basilic frais", type: "anti-inflammatoire", legume: true },
+  { name: "Blettes", type: "anti-inflammatoire", legume: true },
+  { name: "Brocolis", type: "pro-inflammatoire", legume: true },
+  { name: "Carotte (cuite)", type: "anti-inflammatoire", legume: true },
+  { name: "Céléri", type: "anti-inflammatoire", legume: true },
+  { name: "Champignons", type: "pro-inflammatoire", legume: true }, // fermentescible
+  { name: "Chou-fleur", type: "pro-inflammatoire", legume: true }, // fermentescible
+  { name: "Concombre", type: "neutre", legume: true },
+  { name: "Courgette", type: "neutre", legume: true },
+  { name: "Courge butternut", type: "anti-inflammatoire", legume: true },
+  { name: "Courge spaghetti", type: "anti-inflammatoire", legume: true },
+  { name: "Échalote (cuite)", type: "pro-inflammatoire", legume: true },
+  { name: "Échalote (crue)", type: "inflammatoire", legume: true },
+  { name: "Épinards", type: "anti-inflammatoire", legume: true },
+  { name: "Fenouil", type: "anti-inflammatoire", legume: true },
+  { name: "Haricot vert", type: "anti-inflammatoire", legume: true },
+  { name: "Laitue", type: "neutre", legume: true },
+  { name: "Lentilles", type: "anti-inflammatoire", legume: true },
+  { name: "Mâche", type: "anti-inflammatoire", legume: true },
+  { name: "Oignon (cuit)", type: "pro-inflammatoire", legume: true },
+  { name: "Oignon (cru)", type: "inflammatoire", legume: true },
+  { name: "Panais", type: "anti-inflammatoire", legume: true },
+  { name: "Persil", type: "anti-inflammatoire", legume: true },
+  { name: "Pissenlit", type: "anti-inflammatoire", legume: true },
+  { name: "Poivron rouge", type: "anti-inflammatoire", legume: true },
+  { name: "Pois chiches", type: "inflammatoire", legume: true },
+  { name: "Potimarron", type: "anti-inflammatoire", legume: true },
+  { name: "Radis", type: "anti-inflammatoire", legume: true },
+  { name: "Roquette", type: "neutre", legume: true },
+  { name: "Rutabaga", type: "anti-inflammatoire", legume: true },
+  { name: "Tomate", type: "neutre", legume: true },
+  { name: "Topinambour", type: "pro-inflammatoire", legume: true }, // fermentescible
+  { name: "Navets", type: "neutre", legume: true },
 
-  // --- DIET UTILS (Migration ultra-robuste) ---
-  function getDietEntryForDate(entry) {
-    const defaultGoals = { "Boire 1.5 litre": false, "Une poignée d'amandes": false, "2 c. à s. de graines de chia": false, "2 c. à s. d'huile de noix": false };
-    const weeklyGoals = { "300 gr. de poisson gras": false, "Pas de café": false, "Pas d'alcool": false };
-    const activityGoals = { "5 min. cohérence cardiaque": false, "Exercices kiné": false, "30 min. de marche / piscine": false };
-    const activityWeeklyGoals = { "Une séance de sport (longue)": false };
+  // Fruit
+  { name: "Abricot", type: "neutre", fruit: true },
+  { name: "Amande", type: "anti-inflammatoire", omega3: true, fruit: true },
+  { name: "Ananas", type: "anti-inflammatoire", fruit: true },
+  { name: "Clémentine", type: "anti-inflammatoire", fruit: true },
+  { name: "Citron", type: "anti-inflammatoire", fruit: true },
+  { name: "Fraise", type: "anti-inflammatoire", fruit: true },
+  { name: "Grenade", type: "anti-inflammatoire", fruit: true },
+  { name: "Kiwi", type: "anti-inflammatoire", fruit: true },
+  { name: "Mandarine", type: "anti-inflammatoire", fruit: true },
+  { name: "Rhubarbe", type: "neutre", fruit: true },
+  { name: "Banane", type: "neutre", fruit: true },
+  { name: "Cassis", type: "anti-inflammatoire", fruit: true },
+  { name: "Cerise", type: "anti-inflammatoire", fruit: true },
+  { name: "Melon", type: "neutre", fruit: true },
+  { name: "Mirabelle", type: "neutre", fruit: true },
+  { name: "Mûre", type: "anti-inflammatoire", fruit: true },
+  { name: "Myrtille", type: "anti-inflammatoire", fruit: true },
+  { name: "Pêche", type: "neutre", fruit: true },
+  { name: "Pêche de vigne", type: "neutre", fruit: true },
+  { name: "Prune", type: "neutre", fruit: true },
+  { name: "Coing", type: "neutre", fruit: true },
+  { name: "Figue", type: "anti-inflammatoire", fruit: true },
+  { name: "Kaki", type: "neutre", fruit: true },
+  { name: "Pomme", type: "neutre", fruit: true },
+  { name: "Poire", type: "neutre", fruit: true },
+  { name: "Quetsche", type: "neutre", fruit: true },
+  { name: "Raisin", type: "neutre", fruit: true },
 
-    const defaultMealsData = {
-      "Petit-déjeuner": { categories: { "Boisson": [], "Céréale": [], "Fruit": [], "Laitage": [] }, digestionScale: null },
-      "Déjeuner": { categories: { "Légumes": [], "Féculents": [], "Protéines": [] }, digestionScale: null },
-      "Goûter": { categories: { "Boisson": [], "Céréale": [], "Fruit": [], "Laitage": [] }, digestionScale: null },
-      "Dîner": { categories: { "Légumes": [], "Féculents": [], "Protéines": [] }, digestionScale: null }
+  // Féculent
+  // Pain (classique vs complet vs sans gluten)
+  { name: "Baguette blanche", type: "pro-inflammatoire", feculent: true },
+  { name: "Pain au blé complet", type: "anti-inflammatoire", feculent: true },
+  { name: "Pain de seigle", type: "neutre", feculent: true },
+  { name: "Pain sans gluten", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Pain complet au levain", type: "anti-inflammatoire", feculent: true },
+
+  // Pâtes (blé moderne vs ancien vs sans gluten)
+  { name: "Pâtes blanches", type: "pro-inflammatoire", feculent: true },
+  { name: "Pâtes au blé complet", type: "neutre", feculent: true },
+  { name: "Pâtes au sarrasin", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Pâtes de maïs", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Pâtes de lentilles corail", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Pâtes de pois chiches", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Pâtes sans gluten", type: "neutre", glutenfree: true, feculent: true },
+
+  // Riz
+  { name: "Riz basmati", type: "neutre", feculent: true },
+  { name: "Riz complet", type: "anti-inflammatoire", feculent: true },
+  { name: "Riz rouge", type: "anti-inflammatoire", feculent: true },
+  { name: "Riz sauvage", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+
+  // Céréales sans gluten naturelles
+  { name: "Amarante", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Sarrasin", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Maïs", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Millet", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Quinoa", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+
+  // Pseudocéréales et légumineuses féculentes
+  { name: "Châtaigne", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Lentilles corail", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Polenta", type: "neutre", glutenfree: true, feculent: true },
+
+  // Féculents racines (tous sans gluten)
+  { name: "Igname", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Marron", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Panais", type: "anti-inflammatoire", glutenfree: true, feculent: true }, // déjà présent en légume mais catégorie différente
+  { name: "Patate douce", type: "anti-inflammatoire", glutenfree: true, feculent: true },
+  { name: "Pommes de terre", type: "neutre", glutenfree: true, feculent: true },
+  { name: "Topinambour", type: "pro-inflammatoire", glutenfree: true, feculent: true }, // déjà présent en légume mais catégorie différente
+  { name: "Yuca (manioc)", type: "neutre", glutenfree: true, feculent: true },
+
+  // Protéine
+  { name: "Anchois", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Boeuf", type: "inflammatoire", proteine: true },
+  { name: "Crevettes", type: "neutre", proteine: true },
+  { name: "Dorade", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Hareng", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Maquereau", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Poulet", type: "neutre", proteine: true },
+  { name: "Saumon", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Sardine", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Seitan", type: "neutre", proteine: true },
+  { name: "Tempeh", type: "anti-inflammatoire", proteine: true },
+  { name: "Thon", type: "anti-inflammatoire", omega3: true, proteine: true },
+  { name: "Tofu", type: "neutre", proteine: true },
+  { name: "Truite", type: "anti-inflammatoire", omega3: true, proteine: true },
+
+  // Laitage
+  // Yaourts (nature, entier)
+  { name: "Yaourt de brebis", type: "neutre", laitage: true },
+  { name: "Yaourt de chèvre", type: "neutre", laitage: true },
+  { name: "Yaourt grec", type: "neutre", laitage: true },
+  { name: "Yaourt nature entier", type: "neutre", laitage: true },
+
+  // Fromages frais méditerranéens
+  { name: "Cabécou", type: "neutre", laitage: true },
+  { name: "Chèvre frais", type: "neutre", laitage: true },
+  { name: "Feta (brebis/chèvre)", type: "neutre", laitage: true },
+  { name: "Fromage frais de chèvre", type: "neutre", laitage: true },
+  { name: "Ricotta", type: "neutre", laitage: true },
+
+  // Fromages à pâte dure ARTISANAUX (neutres)
+  { name: "Comté (fromager)", type: "neutre", laitage: true },
+  { name: "Cantal (fromager)", type: "neutre", laitage: true },
+  { name: "Gruyère (fromager)", type: "neutre", laitage: true },
+  { name: "Manchego", type: "neutre", laitage: true },
+  { name: "Pecorino", type: "neutre", laitage: true },
+  { name: "Roquefort (fromager)", type: "neutre", laitage: true },
+
+  // Fromages à pâte dure INDUSTRIELS (inflammatoires)
+  { name: "Comté (industriel)", type: "inflammatoire", laitage: true },
+  { name: "Cheddar (industriel)", type: "inflammatoire", laitage: true },
+  { name: "Emmental (industriel)", type: "inflammatoire", laitage: true },
+
+  // Graine / fruits secs
+  // Graines riches en oméga-3
+  { name: "Graines de chanvre", type: "anti-inflammatoire", omega3: true, graine: true },
+  { name: "Graines de chia", type: "anti-inflammatoire", omega3: true, graine: true },
+  { name: "Graines de courge", type: "anti-inflammatoire", graine: true },
+  { name: "Graines de lin moulues", type: "anti-inflammatoire", omega3: true, graine: true },
+  { name: "Graines de sésame", type: "anti-inflammatoire", graine: true },
+  { name: "Graines de tournesol", type: "anti-inflammatoire", graine: true },
+
+  // Fruits secs piliers méditerranéens
+  { name: "Amande", type: "anti-inflammatoire", omega3: true, graine: true }, // déjà présente comme fruit sec, ici aussi catégorisée graine
+  { name: "Cacahuète", type: "neutre", graine: true },
+  { name: "Figue sèche", type: "anti-inflammatoire", graine: true },
+  { name: "Noisette", type: "anti-inflammatoire", omega3: true, graine: true },
+  { name: "Noix", type: "anti-inflammatoire", omega3: true, graine: true },
+  { name: "Noix de cajou", type: "neutre", graine: true },
+  { name: "Noix de macadamia", type: "neutre", graine: true },
+  { name: "Pistache", type: "anti-inflammatoire", graine: true },
+  { name: "Raisin sec", type: "neutre", graine: true },
+
+  // Assaisonnement
+  // Huiles
+  { name: "Huile d'olive", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Huile de colza", type: "anti-inflammatoire", omega3: true, assaisonnement: true },
+  { name: "Huile de lin", type: "anti-inflammatoire", omega3: true, assaisonnement: true },
+  { name: "Huile de noix", type: "anti-inflammatoire", omega3: true, assaisonnement: true },
+
+  // Vinaigres
+  { name: "Vinaigre balsamique", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Vinaigre de cidre", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Vinaigre de vin rouge", type: "neutre", assaisonnement: true },
+  { name: "Vinaigre de xérès", type: "neutre", assaisonnement: true },
+
+  // Moutardes
+  { name: "Moutarde de Dijon", type: "neutre", assaisonnement: true },
+  { name: "Moutarde à l'ancienne", type: "neutre", assaisonnement: true },
+
+  // Sauces
+  { name: "Ketchup", type: "pro-inflammatoire", assaisonnement: true },
+  { name: "Mayonnaise", type: "pro-inflammatoire", assaisonnement: true },
+  { name: "Sauce aigre-douce", type: "pro-inflammatoire", assaisonnement: true },
+  { name: "Sauce soja", type: "neutre", assaisonnement: true },
+  { name: "Sauce tomate", type: "neutre", assaisonnement: true },
+
+  // Épices ANTI-INFLAMMATOIRES (top 5 + bonus)
+  { name: "Ail en poudre", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Basilic séché", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Cannelle", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Curcuma", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Gingembre", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Origan", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Romarin", type: "anti-inflammatoire", assaisonnement: true },
+  { name: "Thym", type: "anti-inflammatoire", assaisonnement: true },
+
+  // Épices NEUTRES
+  { name: "Ciboulette", type: "neutre", assaisonnement: true },
+  { name: "Coriandre", type: "neutre", assaisonnement: true },
+  { name: "Cumin", type: "neutre", assaisonnement: true },
+  { name: "Estragon", type: "neutre", assaisonnement: true },
+  { name: "Laurier", type: "neutre", assaisonnement: true },
+  { name: "Muscade", type: "neutre", assaisonnement: true },
+  { name: "Paprika doux", type: "neutre", assaisonnement: true },
+  { name: "Persil séché", type: "neutre", assaisonnement: true },
+  { name: "Sarriette", type: "neutre", assaisonnement: true },
+
+  // Épices PRO-INFLAMMATOIRES
+  { name: "Piment de Cayenne", type: "pro-inflammatoire", assaisonnement: true },
+  { name: "Poivre noir", type: "pro-inflammatoire", assaisonnement: true },
+
+  // Boisson
+  { name: "Alcool", type: "inflammatoire", boisson: true },
+  { name: "Bière", type: "inflammatoire", boisson: true },
+  { name: "Café", type: "inflammatoire", boisson: true },
+  { name: "Café décaféiné", type: "neutre", boisson: true },
+  { name: "Cidre", type: "inflammatoire", boisson: true },
+  { name: "Eau", type: "neutre", boisson: true },
+  { name: "Lait d'amande", type: "neutre", boisson: true },
+  { name: "Lait d'avoine", type: "neutre", boisson: true },
+  { name: "Lait de coco", type: "neutre", boisson: true },
+  { name: "Lait d'épeautre", type: "neutre", boisson: true },
+  { name: "Lait de noisette", type: "anti-inflammatoire", boisson: true },
+  { name: "Lait de riz", type: "neutre", boisson: true },
+  { name: "Lait de soja", type: "neutre", boisson: true },
+  { name: "Lait de sésame", type: "neutre", boisson: true },
+  { name: "Soda", type: "inflammatoire", boisson: true },
+  { name: "Soupe miso", type: "neutre", boisson: true },
+  { name: "Thé noir", type: "inflammatoire", boisson: true },
+  { name: "Thé vert", type: "pro-inflammatoire", boisson: true },
+  { name: "Tisane à la camomille", type: "anti-inflammatoire", boisson: true },
+  { name: "Tisane à la mélisse", type: "anti-inflammatoire", boisson: true },
+  { name: "Tisane à la menthe poivrée", type: "neutre", boisson: true },
+  { name: "Tisane à l'oranger", type: "anti-inflammatoire", boisson: true },
+  { name: "Tisane à la reine-des-prés", type: "anti-inflammatoire", boisson: true },
+  { name: "Rooibos", type: "anti-inflammatoire", boisson: true },
+  { name: "Tisane au tilleul", type: "anti-inflammatoire", boisson: true },
+  { name: "Tisane à la verveine", type: "anti-inflammatoire", boisson: true },
+  { name: "Vin rouge", type: "pro-inflammatoire", boisson: true },
+
+  // Autre
+  { name: "Chocolat au lait", type: "pro-inflammatoire", autre: true },
+  { name: "Chocolat blanc", type: "pro-inflammatoire", autre: true },
+  { name: "Chocolat noir", type: "neutre", autre: true },
+  { name: "Gyoza", type: "neutre", autre: true },
+  { name: "Houmous", type: "inflammatoire", autre: true },
+  { name: "Olives", type: "anti-inflammatoire", autre: true },
+  { name: "Sushi", type: "anti-inflammatoire", autre: true }
+];
+
+// --- SUIVI ALIMENTAIRE ---
+function getDietEntryForDate(entry) {
+  const defaultGoals = { "Boire 1.5 litre": false, "Une poignée d'amandes": false, "2 c. à s. de graines de chia": false, "2 c. à s. d'huile de noix": false };
+  const weeklyGoals = { "300 gr. de poisson gras": false, "Pas de café": false, "Pas d'alcool": false };
+  const activityGoals = { "5 min. cohérence cardiaque": false, "Exercices kiné": false, "30 min. de marche / piscine": false };
+  const activityWeeklyGoals = { "Une séance de sport (longue)": false };
+
+  const defaultMealsData = {
+    "Petit-déjeuner": { categories: { "Boisson": [], "Repas": [] }, digestionScale: null },
+    "Déjeuner":       { categories: { "Boisson": [], "Repas": [] }, digestionScale: null },
+    "Goûter":         { categories: { "Boisson": [], "Repas": [] }, digestionScale: null },
+    "Dîner":          { categories: { "Boisson": [], "Repas": [] }, digestionScale: null }
+  };
+
+  if (!entry.diet) {
+    entry.diet = {
+      goals: defaultGoals,
+      weeklyGoals: weeklyGoals,
+      activityGoals: activityGoals,
+      activityWeeklyGoals: activityWeeklyGoals,
+      meals: JSON.parse(JSON.stringify(defaultMealsData))
     };
+  } else {
+    if (!entry.diet.meals) entry.diet.meals = {};
 
-    if (!entry.diet) {
-      entry.diet = { goals: defaultGoals, weeklyGoals: weeklyGoals, meals: defaultMealsData };
-    } else {
-      // S'assurer que .meals existe
-      if (!entry.diet.meals) entry.diet.meals = {};
+    Object.keys(defaultMealsData).forEach(m => {
+      // Gérer l'ancien nommage avec tiret
+      if (!entry.diet.meals[m]) {
+        const noDash = m.replace('-', ' ');
+        if (entry.diet.meals[noDash]) {
+          entry.diet.meals[m] = entry.diet.meals[noDash];
+          delete entry.diet.meals[noDash];
+        } else {
+          entry.diet.meals[m] = JSON.parse(JSON.stringify(defaultMealsData[m]));
+        }
+      }
 
-      // Forcer l'existence de chaque repas
-      Object.keys(defaultMealsData).forEach(m => {
-        if (!entry.diet.meals[m]) {
-          const noDash = m.replace('-', ' ');
-          if (entry.diet.meals[noDash]) {
-            entry.diet.meals[m] = entry.diet.meals[noDash];
-            delete entry.diet.meals[noDash];
-          } else {
-            entry.diet.meals[m] = JSON.parse(JSON.stringify(defaultMealsData[m]));
-          }
-        }
-        // S'assurer que .categories existe pour ce repas
-        if (!entry.diet.meals[m].categories) {
-          entry.diet.meals[m].categories = JSON.parse(JSON.stringify(defaultMealsData[m].categories));
-        }
-        if (entry.diet.meals[m].digestionScale === undefined) {
-          entry.diet.meals[m].digestionScale = null;
-        }
-      });
+      // Migrer les anciennes catégories vers Boisson / Repas si nécessaire
+      const cats = entry.diet.meals[m].categories;
+      if (!cats) {
+        entry.diet.meals[m].categories = JSON.parse(JSON.stringify(defaultMealsData[m].categories));
+      } else if (!('Repas' in cats)) {
+        // Anciennes catégories détectées : tout regrouper dans Repas, Boisson reste vide
+        const allItems = Object.values(cats).flat();
+        entry.diet.meals[m].categories = {
+          "Boisson": cats["Boisson"] || [],
+          "Repas": allItems.filter(name => !((cats["Boisson"] || []).includes(name)))
+        };
+      }
 
-      if (!entry.diet.weeklyGoals) entry.diet.weeklyGoals = weeklyGoals;
-      if (!entry.diet.goals) entry.diet.goals = defaultGoals;
-      if (!entry.diet.activityGoals) entry.diet.activityGoals = activityGoals;
-      if (!entry.diet.activityWeeklyGoals) entry.diet.activityWeeklyGoals = activityWeeklyGoals;
+      if (entry.diet.meals[m].digestionScale === undefined) {
+        entry.diet.meals[m].digestionScale = null;
+      }
+    });
+
+    if (!entry.diet.weeklyGoals) entry.diet.weeklyGoals = weeklyGoals;
+    if (!entry.diet.goals) entry.diet.goals = defaultGoals;
+    if (!entry.diet.activityGoals) entry.diet.activityGoals = activityGoals;
+    if (!entry.diet.activityWeeklyGoals) entry.diet.activityWeeklyGoals = activityWeeklyGoals;
+  }
+  return entry.diet;
+}
+
+function getFoodTypeColor(foodName) {
+  const food = foodDatabase.find(f => f.name === foodName);
+
+  if (!food) {
+    return {
+      bg: '#f1f5f9',
+      border: '#e2e8f0',
+      color: '#64748b',
+      isGradient: false
+    };
+  }
+
+  const typeColors = {
+    'anti-inflammatoire': { bg: '#dcfce7', border: '#16a34a', color: '#166534' },
+    'neutre':             { bg: '#f3f4f6', border: '#d1d5db', color: '#6b7280' },
+    'pro-inflammatoire':  { bg: '#ffedd5', border: '#f97316', color: '#9a3412' },
+    'inflammatoire':      { bg: '#fee2e2', border: '#ef4444', color: '#991b1b' }
+  };
+
+  const baseColor = typeColors[food.type] || {
+    bg: '#f8fafc', border: '#e2e8f0', color: '#475569'
+  };
+
+  if (food.omega3) {
+    return {
+      bg: `linear-gradient(135deg, ${baseColor.bg} 50%, #fef9c3 55%, #fde047 100%)`,
+      dotBg: `linear-gradient(135deg, ${baseColor.border} 50%, #fef9c3 55%, #fde047 100%)`,
+      border: baseColor.border,
+      color: baseColor.color,
+      isGradient: true
+    };
+  }
+  return { ...baseColor, dotBg: baseColor.border, isGradient: false };
+}
+
+function applyTagStyles() {
+  document.querySelectorAll('.food-tag').forEach(tag => {
+    const foodName = tag.dataset.food;
+    const colors = getFoodTypeColor(foodName);
+
+    const dot = tag.querySelector('.color-dot');
+    if (dot) {
+      // Le dégradé doit être appliqué via background, pas background-color
+      dot.style.background = colors.dotBg || colors.border;
+      dot.style.borderColor = colors.border;
     }
-    return entry.diet;
-  }
 
-  function getFoodTypeColor(foodName) {
-    const food = foodDatabase.find(f => f.name === foodName);
-    if (!food) return { bg: '#f1f5f9', border: '#e2e8f0', color: '#64748b' };
-    if (food.type === 'anti-inflammatoire') return { bg: '#f0fdf4', border: '#bbf7d0', color: '#166534' };
-    if (food.type === 'pro-inflammatoire') return { bg: '#fef2f2', border: '#fecaca', color: '#991b1b' };
-    return { bg: '#f8fafc', border: '#e2e8f0', color: '#475569' };
-  }
+    // Pour le tag : background accepte les gradients
+    tag.style.background = colors.bg;
+    tag.style.borderColor = colors.border;
+    tag.style.color = colors.color;
+  });
+}
 
-  function createAutocompleteInput(mealName, categoryName) {
-    const dietData = getDietEntryForDate(getEntryForDate(selectedDate));
-    const wrapper = document.createElement('div');
-    wrapper.className = 'autocomplete-wrapper';
-    const input = document.createElement('input');
-    input.type = 'text'; input.className = 'input-field'; input.placeholder = '...';
-    const list = document.createElement('div'); list.className = 'autocomplete-list';
-    const tagsContainer = document.createElement('div'); tagsContainer.className = 'food-tags';
+function createAutocompleteInput(mealName, categoryName, onUpdate) {
+  const dietData = getDietEntryForDate(getEntryForDate(selectedDate));
+  const wrapper = document.createElement('div');
+  wrapper.className = 'autocomplete-wrapper';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'input-field';
+  input.placeholder = '...';
+  const list = document.createElement('div');
+  list.className = 'autocomplete-list';
+  const tagsContainer = document.createElement('div');
+  tagsContainer.className = 'food-tags';
 
-    const renderTags = () => {
-      tagsContainer.innerHTML = '';
-      const items = dietData.meals[mealName].categories[categoryName] || [];
-      items.forEach((itemName, idx) => {
-        const col = getFoodTypeColor(itemName);
-        const tag = document.createElement('span');
-        tag.className = 'food-tag';
-        tag.style.cssText = `background:${col.bg}; border-color:${col.border}; color:${col.color}`;
-        tag.innerHTML = `${itemName} <span style="margin-left:8px; cursor:pointer;" data-index="${idx}">&times;</span>`;
-        tag.querySelector('span').addEventListener('click', (ev) => { ev.stopPropagation(); items.splice(idx, 1); saveData(); renderTags(); });
-        tagsContainer.appendChild(tag);
+  const renderTags = () => {
+    tagsContainer.innerHTML = '';
+    const items = dietData.meals[mealName].categories[categoryName] || [];
+    items.forEach((itemName, idx) => {
+      const col = getFoodTypeColor(itemName);
+      const tag = document.createElement('span');
+      tag.className = 'food-tag';
+      tag.dataset.food = itemName;
+
+      const label = document.createTextNode(itemName + ' ');
+
+      const closeBtn = document.createElement('span');
+      closeBtn.style.marginLeft = '8px';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.dataset.index = idx;
+      closeBtn.textContent = '×';
+      closeBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        items.splice(idx, 1);
+        saveData();
+        renderTags();
       });
-    };
 
-    input.addEventListener('input', (e) => {
-      const val = e.target.value.toLowerCase().trim();
-      list.innerHTML = '';
-      if (!val) return;
-      foodDatabase.filter(f => f.name.toLowerCase().includes(val)).forEach(match => {
+      tag.appendChild(label);
+      tag.appendChild(closeBtn);
+
+      tag.style.background = col.bg;
+      tag.style.borderColor = col.border;
+      tag.style.color = col.color;
+
+      tagsContainer.appendChild(tag);
+    });
+    if (onUpdate) onUpdate();
+  };
+
+  input.addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase().trim();
+    list.innerHTML = '';
+    if (!val) return;
+
+    const isBoisson = categoryName === 'Boisson';
+
+    const normalize = str => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normalizedVal = normalize(val);
+
+    foodDatabase
+      .filter(f => isBoisson ? f.boisson === true : !f.boisson)
+      .filter(f => normalize(f.name).startsWith(normalizedVal))
+      .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+      .forEach(match => {
+        const col = getFoodTypeColor(match.name);
         const item = document.createElement('div');
         item.className = 'autocomplete-item';
-        item.innerHTML = `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px; background:${getFoodTypeColor(match.name).border};"></span>${match.name}`;
+
+        const dot = document.createElement('span');
+        dot.style.display = 'inline-block';
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.borderRadius = '50%';
+        dot.style.marginRight = '8px';
+        dot.style.flexShrink = '0';
+        dot.style.background = col.dotBg || col.border;
+
+        const label = document.createTextNode(match.name);
+        item.appendChild(dot);
+        item.appendChild(label);
+
         item.addEventListener('click', (ev) => {
           ev.stopPropagation();
           const arr = dietData.meals[mealName].categories[categoryName];
-          if (!arr.includes(match.name)) { arr.push(match.name); saveData(); }
-          input.value = ''; list.innerHTML = ''; renderTags();
+          if (!arr.includes(match.name)) {
+            arr.push(match.name);
+            saveData();
+          }
+          input.value = '';
+          list.innerHTML = '';
+          renderTags();
         });
+
         list.appendChild(item);
       });
-    });
+  });
 
-    wrapper.appendChild(tagsContainer); wrapper.appendChild(input); wrapper.appendChild(list);
-    renderTags();
-    return wrapper;
-  }
+  wrapper.appendChild(tagsContainer);
+  wrapper.appendChild(input);
+  wrapper.appendChild(list);
+  renderTags();
+  return wrapper;
+}
 
-  function createMealAccordion(mealName) {
-    const dietData = getDietEntryForDate(getEntryForDate(selectedDate));
-    const details = document.createElement('details');
-    details.className = 'meal-accordion card';
-    details.style.borderRadius = '24px';
-    // Par défaut, on peut essayer de les laisser OUVERTS pour aider l'utilisateur à voir le contenu
-    // details.open = true; 
+function createMealAccordion(mealName) {
+  const dietData = getDietEntryForDate(getEntryForDate(selectedDate));
+  const details = document.createElement('details');
+  details.className = 'meal-accordion card';
+  details.style.borderRadius = '24px';
 
-    const summary = document.createElement('summary');
-    summary.className = 'meal-summary';
-    summary.innerHTML = `<span style="font-weight:700; font-size:1.1rem; color:var(--text-main);">${mealName}</span> <span class="accordion-icon">🔻</span>`;
+  const summary = document.createElement('summary');
+  summary.className = 'meal-summary';
+  summary.style.cssText = 'display:flex; align-items:center; justify-content:space-between; list-style:none; outline:none; cursor:pointer;';
+
+  const titleSpan = document.createElement('span');
+  titleSpan.style.cssText = 'font-weight:700; font-size:1.1rem; color:var(--text-main);';
+  titleSpan.textContent = mealName;
+
+  // --- Calcul des couleurs des icônes ---
+  const getMealIconColors = () => {
+    const cats = dietData.meals[mealName]?.categories || {};
+    const boissons = cats['Boisson'] || [];
+    const repas = cats['Repas'] || [];
+
+    // Priorité des types : inflammatoire > pro-inflammatoire > neutre > anti-inflammatoire
+    const typeRank = { 'inflammatoire': 4, 'pro-inflammatoire': 3, 'neutre': 2, 'anti-inflammatoire': 1 };
+    const colorMap = {
+      'anti-inflammatoire': '#16a34a',
+      'neutre': '#16a34a',       // vert comme anti-inflammatoire
+      'pro-inflammatoire': '#f97316',
+      'inflammatoire': '#ef4444'
+    };
+
+    // Couleur tasse (règle la plus haute priorité gagne)
+    let cupColor = null;
+    if (boissons.length > 0) {
+      let maxRank = 0;
+      boissons.forEach(name => {
+        const f = foodDatabase.find(f => f.name === name);
+        if (f && typeRank[f.type] > maxRank) maxRank = typeRank[f.type];
+      });
+      // neutre + pro-inflammatoire → orange ; neutre + inflammatoire → rouge
+      // anti + neutre → vert
+      const rankToColor = { 1: '#16a34a', 2: '#16a34a', 3: '#f97316', 4: '#ef4444' };
+      cupColor = rankToColor[maxRank];
+    }
+
+    // Couleur assiette
+    let plateColor = null;
+    let plateGradient = null;
+    if (repas.length > 0) {
+      let hasGood = false; // anti ou neutre
+      let hasBad = false;  // pro ou inflammatoire
+      let worstType = 'anti-inflammatoire';
+      let worstRank = 0;
+
+      repas.forEach(name => {
+        const f = foodDatabase.find(f => f.name === name);
+        if (!f) return;
+        if (f.type === 'anti-inflammatoire' || f.type === 'neutre') hasGood = true;
+        if (f.type === 'pro-inflammatoire' || f.type === 'inflammatoire') hasBad = true;
+        if (typeRank[f.type] > worstRank) { worstRank = typeRank[f.type]; worstType = f.type; }
+      });
+
+      if (hasGood && hasBad) {
+        // Dégradé 50-50
+        const badColor = worstType === 'inflammatoire' ? '#ef4444' : '#f97316';
+        plateGradient = `linear-gradient(135deg, #16a34a 50%, ${badColor} 50%)`;
+      } else {
+        const rankToColor = { 1: '#16a34a', 2: '#16a34a', 3: '#f97316', 4: '#ef4444' };
+        plateColor = rankToColor[worstRank];
+      }
+    }
+
+    return { cupColor, plateColor, plateGradient };
+  };
+
+  const { cupColor, plateColor, plateGradient } = getMealIconColors();
+  const defaultGray = '#cbd5e1';
+
+// --- SVG tasse ---
+  const cupSVG = (color) => `
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 6h11v8a4 4 0 01-4 4H9a4 4 0 01-4-4V6z" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M16 8h2a2 2 0 010 4h-2" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="7" y1="3" x2="7" y2="5" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="10" y1="2" x2="10" y2="5" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="13" y1="3" x2="13" y2="5" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>`;
+
+  // --- SVG assiette + fourchette + couteau ---
+    const plateSVG = (color, gradient) => {
+      const colors = gradient ? gradient.match(/#[0-9a-f]{6}/gi) : null;
+      const c1 = colors?.[0] || color || defaultGray;
+      const c2 = colors?.[1] || color || defaultGray;
+
+      const gradDef = gradient ? `
+        <defs>
+          <linearGradient id="${plateId}" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="50%" stop-color="${c1}"/>
+            <stop offset="50%" stop-color="${c2}"/>
+          </linearGradient>
+        </defs>` : '';
+
+      const strokeColor = gradient ? `url(#${plateId})` : (color || defaultGray);
+
+      return `
+        <svg width="26" height="22" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          ${gradDef}
+
+          <!-- Fourchette (gauche) -->
+          <line x1="3" y1="3" x2="3" y2="10" stroke="${c1}" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="5" y1="3" x2="5" y2="10" stroke="${c1}" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="7" y1="3" x2="7" y2="10" stroke="${c1}" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M3 10 Q5 13 5 14 L5 21" stroke="${c1}" stroke-width="1.5" stroke-linecap="round"/>
+
+          <!-- Assiette (centre) -->
+          <circle cx="14" cy="12" r="7" stroke="${strokeColor}" stroke-width="1.8"/>
+          <circle cx="14" cy="12" r="4" stroke="${strokeColor}" stroke-width="1.2"/>
+
+          <!-- Couteau (droite) -->
+          <path d="M23 3 C25 3 26 5 26 8 L25 10 L23 10 Z" stroke="${c2}" stroke-width="1.3" stroke-linejoin="round"/>
+          <line x1="24" y1="10" x2="24" y2="21" stroke="${c2}" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>`;
+    };
+
+  const iconsWrapper = document.createElement('div');
+    iconsWrapper.style.cssText = 'display:flex; align-items:center; gap:8px;';
+
+    const updateIcons = () => {
+      const { cupColor, plateColor, plateGradient } = getMealIconColors();
+      iconsWrapper.innerHTML = `
+        <span title="Boisson">${cupSVG(cupColor || defaultGray)}</span>
+        <span title="Repas">${plateSVG(plateColor, plateGradient)}</span>
+      `;
+    };
+
+    updateIcons(); // premier rendu
+
+    summary.appendChild(titleSpan);
+    summary.appendChild(iconsWrapper);
     details.appendChild(summary);
 
-    const content = document.createElement('div');
-    content.className = 'meal-content';
+  const content = document.createElement('div');
+  content.className = 'meal-content';
 
-    if (dietData.meals[mealName] && dietData.meals[mealName].categories) {
-      Object.keys(dietData.meals[mealName].categories).forEach(cat => {
+  if (dietData.meals[mealName] && dietData.meals[mealName].categories) {
+    Object.keys(dietData.meals[mealName].categories).forEach(cat => {
         const row = document.createElement('div');
         row.className = 'food-category-row';
         row.innerHTML = `<div class="category-label">${cat}</div>`;
-        row.appendChild(createAutocompleteInput(mealName, cat));
+        row.appendChild(createAutocompleteInput(mealName, cat, updateIcons)); // ← updateIcons passé ici
         content.appendChild(row);
       });
-    }
-
-    const scaleLabel = document.createElement('h4');
-    scaleLabel.style.margin = '20px 0 10px 0';
-    scaleLabel.style.fontSize = '0.9rem';
-    scaleLabel.style.fontWeight = '700';
-    scaleLabel.textContent = 'Inconfort digestif';
-    content.appendChild(scaleLabel);
-
-    const scaleGrid = document.createElement('div');
-    scaleGrid.className = 'options-grid';
-    scaleGrid.style.justifyContent = 'space-between';
-    scaleGrid.style.marginTop = '10px';
-
-    const grads = ['#fff7ed', '#ffedd5', '#fed7aa', '#fdba74', '#fb923c']; // Orange/Peach shades
-    [1, 2, 3, 4, 5].forEach((v, idx) => {
-      const isSel = dietData.meals[mealName].digestionScale === v;
-      const btn = document.createElement('button');
-      btn.style.cssText = `width:42px; height:42px; border-radius:50%; border:${isSel ? '2px solid #fb923c' : 'none'}; background:${grads[idx]}; opacity:${isSel ? 1 : 0.6}; transform:${isSel ? 'scale(1.1)' : 'scale(1)'}; cursor:pointer; font-weight:800; font-family:'Outfit';`;
-      btn.textContent = v;
-      btn.addEventListener('click', () => {
-        dietData.meals[mealName].digestionScale = dietData.meals[mealName].digestionScale === v ? null : v;
-        const entry = getEntryForDate(selectedDate);
-        const scales = Object.values(entry.diet.meals).map(m => m.digestionScale).filter(s => s !== null);
-        if (scales.length > 0) {
-          entry.symptomLevels.discomfort = Math.max(...scales);
-        }
-        saveData(); renderDietTracking();
-      });
-      scaleGrid.appendChild(btn);
-    });
-
-    content.appendChild(scaleLabel);
-    content.appendChild(scaleGrid);
-
-    details.appendChild(content);
-    return details;
   }
 
-  function renderGoals(container, dataMap, label, startCollapsed = false) {
-    const banner = document.createElement('div');
-    banner.className = 'goals-banner';
-    const title = document.createElement('h3');
-    title.style.margin = '0'; title.style.color = 'var(--primary)'; title.style.fontSize = '1rem';
-    banner.appendChild(title);
+  const scaleLabel = document.createElement('h4');
+  scaleLabel.style.margin = '20px 0 10px 0';
+  scaleLabel.style.fontSize = '0.9rem';
+  scaleLabel.style.fontWeight = '700';
+  scaleLabel.textContent = 'Inconfort digestif';
+  content.appendChild(scaleLabel);
 
-    const goalsList = document.createElement('div');
-    goalsList.style.marginTop = '15px';
+  const scaleGrid = document.createElement('div');
+  scaleGrid.className = 'options-grid';
+  scaleGrid.style.justifyContent = 'space-between';
+  scaleGrid.style.marginTop = '10px';
 
-    const updateStatus = () => {
-      const allDone = Object.values(dataMap).every(v => v === true);
-      banner.classList.toggle('completed', allDone);
-      title.innerHTML = `✨ ${label}${allDone ? ' (atteints)' : ''}`;
-
-      const isExpanded = banner.dataset.expanded === "true";
-      const isCollapsed = banner.dataset.expanded === "false";
-
-      if (isExpanded) goalsList.style.display = 'block';
-      else if (isCollapsed) goalsList.style.display = 'none';
-      else if (allDone) goalsList.style.display = 'none';
-      else goalsList.style.display = startCollapsed ? 'none' : 'block';
-    };
-
-    banner.style.cursor = 'pointer';
-    banner.addEventListener('click', (e) => {
-      if (e.target.closest('.goal-item')) return;
-      const isHidden = goalsList.style.display === 'none';
-      goalsList.style.display = isHidden ? 'block' : 'none';
-      banner.dataset.expanded = isHidden ? "true" : "false";
+  const grads = ['#fff7ed', '#ffedd5', '#fed7aa', '#fdba74', '#fb923c'];
+  [1, 2, 3, 4, 5].forEach((v, idx) => {
+    const isSel = dietData.meals[mealName].digestionScale === v;
+    const btn = document.createElement('button');
+    btn.style.cssText = `width:42px; height:42px; border-radius:50%; border:${isSel ? '2px solid #fb923c' : 'none'}; background:${grads[idx]}; opacity:${isSel ? 1 : 0.6}; transform:${isSel ? 'scale(1.1)' : 'scale(1)'}; cursor:pointer; font-weight:800; font-family:'Outfit';`;
+    btn.textContent = v;
+    btn.addEventListener('click', () => {
+      dietData.meals[mealName].digestionScale = dietData.meals[mealName].digestionScale === v ? null : v;
+      const entry = getEntryForDate(selectedDate);
+      const scales = Object.values(entry.diet.meals).map(m => m.digestionScale).filter(s => s !== null);
+      if (scales.length > 0) entry.symptomLevels.discomfort = Math.max(...scales);
+      saveData();
+      renderDietTracking();
     });
+    scaleGrid.appendChild(btn);
+  });
 
-    Object.keys(dataMap).forEach(name => {
-      const item = document.createElement('div');
-      item.className = `goal-item ${dataMap[name] ? 'checked' : ''}`;
-      item.innerHTML = `<div class="goal-checkbox">${dataMap[name] ? '✅' : ''}</div><span>${name}</span>`;
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dataMap[name] = !dataMap[name];
-        item.classList.toggle('checked');
-        item.querySelector('.goal-checkbox').innerHTML = dataMap[name] ? '✅' : '';
-        saveData(); updateStatus();
-      });
-      goalsList.appendChild(item);
+  content.appendChild(scaleGrid);
+  details.appendChild(content);
+  return details;
+}
+
+function renderGoals(container, dataMap, label, startCollapsed = false) {
+  const banner = document.createElement('div');
+  banner.className = 'goals-banner';
+  const title = document.createElement('h3');
+  title.style.margin = '0'; title.style.color = 'var(--primary)'; title.style.fontSize = '1rem';
+  banner.appendChild(title);
+
+  const goalsList = document.createElement('div');
+  goalsList.style.marginTop = '15px';
+
+  const updateStatus = () => {
+    const allDone = Object.values(dataMap).every(v => v === true);
+    banner.classList.toggle('completed', allDone);
+    title.innerHTML = `✨ ${label}${allDone ? ' (atteints)' : ''}`;
+
+    const isExpanded = banner.dataset.expanded === "true";
+    const isCollapsed = banner.dataset.expanded === "false";
+
+    if (isExpanded) goalsList.style.display = 'block';
+    else if (isCollapsed) goalsList.style.display = 'none';
+    else if (allDone) goalsList.style.display = 'none';
+    else goalsList.style.display = startCollapsed ? 'none' : 'block';
+  };
+
+  banner.style.cursor = 'pointer';
+  banner.addEventListener('click', (e) => {
+    if (e.target.closest('.goal-item')) return;
+    const isHidden = goalsList.style.display === 'none';
+    goalsList.style.display = isHidden ? 'block' : 'none';
+    banner.dataset.expanded = isHidden ? "true" : "false";
+  });
+
+  Object.keys(dataMap).forEach(name => {
+    const item = document.createElement('div');
+    item.className = `goal-item ${dataMap[name] ? 'checked' : ''}`;
+    item.innerHTML = `<div class="goal-checkbox">${dataMap[name] ? '✅' : ''}</div><span>${name}</span>`;
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dataMap[name] = !dataMap[name];
+      item.classList.toggle('checked');
+      item.querySelector('.goal-checkbox').innerHTML = dataMap[name] ? '✅' : '';
+      saveData(); updateStatus();
     });
+    goalsList.appendChild(item);
+  });
 
-    banner.appendChild(goalsList);
-    container.appendChild(banner);
-    updateStatus();
-  }
+  banner.appendChild(goalsList);
+  container.appendChild(banner);
+  updateStatus();
+}
 
-  function renderDietTracking() {
-    if (!tabDiet) return;
-    try {
-      const dietData = getDietEntryForDate(getEntryForDate(selectedDate));
-      tabDiet.innerHTML = '<h2 class="section-title">Alimentation</h2>';
+function renderDietTracking() {
+  if (!tabDiet) return;
+  tabDiet.innerHTML = '';
 
-      renderGoals(tabDiet, dietData.goals, "Objectifs du jour", false);
-      renderGoals(tabDiet, dietData.weeklyGoals, "Objectifs de la semaine", true);
+  const entry = getEntryForDate(selectedDate);
+  const dietData = getDietEntryForDate(entry);
 
-      const meals = ["Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"];
-      meals.forEach(m => {
-        tabDiet.appendChild(createMealAccordion(m));
-      });
+  // Repas
+  ['Petit-déjeuner', 'Déjeuner', 'Goûter', 'Dîner'].forEach(mealName => {
+    tabDiet.appendChild(createMealAccordion(mealName));
+  });
 
-      // --- ACTIVITÉ PHYSIQUE ---
-      const activityTitle = document.createElement('h2');
-      activityTitle.className = 'section-title';
-      activityTitle.style.marginTop = '40px';
-      activityTitle.textContent = 'Activité physique';
-      tabDiet.appendChild(activityTitle);
+  // Objectifs nutritionnels quotidiens
+  renderGoals(tabDiet, dietData.goals, 'Objectifs du jour');
 
-      renderGoals(tabDiet, dietData.activityGoals, "Objectifs du jour", false);
-      renderGoals(tabDiet, dietData.activityWeeklyGoals, "Objectifs de la semaine", true);
+  // Objectifs hebdomadaires
+  renderGoals(tabDiet, dietData.weeklyGoals, 'Objectifs de la semaine', true);
 
-    } catch (e) {
-      tabDiet.innerHTML = `<div class="card" style="color:red; padding:20px;">Erreur de chargement: ${e.message}</div>`;
-    }
-  }
+  // Activité physique quotidienne
+  renderGoals(tabDiet, dietData.activityGoals, 'Activité du jour');
 
-  function renderSettings() {
+  // Activité physique hebdomadaire
+  renderGoals(tabDiet, dietData.activityWeeklyGoals, 'Activité de la semaine', true);
+}
+
+function renderSettings() {
     tabSettings.innerHTML = `
       <div class="card" style="text-align: center;">
-        <h2 style="margin-bottom: 20px; color: var(--primary);">Paramètres ✨</h2>
+        <h2 style="margin-bottom: 20px; color: var(--primary);">Paramètres</h2>
         <div style="text-align: left; margin-bottom: 15px;">
           <label style="font-weight: 600; font-size: 0.9rem;">Début du cycle</label>
           <input type="date" id="setup-date" value="${userSettings ? userSettings.cycleStart : new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 12px; border-radius: 15px; border: 1px solid #e2e8f0; font-family: 'Outfit';">
@@ -460,9 +846,9 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       saveData(); switchToTab('tab-daily-notes'); renderDailyNotes();
     });
-  }
+}
 
-  function renderDailyNotes() {
+function renderDailyNotes() {
     if (!tabDailyNotes) return;
     tabDailyNotes.innerHTML = '';
 
@@ -498,8 +884,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let dotsHTML = '';
     const cx = 100; const cy = 100; const r = 85;
-    for (let i = 1; i <= userSettings.cycleLength; i++) {
-      const angle = (i - 1) * (360 / userSettings.cycleLength) - 90;
+    for(let i=1; i<=userSettings.cycleLength; i++) {
+      const angle = (i-1)*(360/userSettings.cycleLength) - 90;
       const rad = angle * Math.PI / 180;
       const dotX = cx + r * Math.cos(rad); const dotY = cy + r * Math.sin(rad);
       let dotColor = i <= userSettings.periodLength ? "#f43f5e" : (i < ovulationDay - 2 ? "#4ade80" : (i >= ovulationDay - 2 && i <= ovulationDay + 2 ? "#facc15" : "#fb923c"));
@@ -556,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
     newCycleBtn.style.padding = '10px 14px';
     newCycleBtn.innerHTML = `<span style="font-size:1.6rem; line-height:1; display:flex; align-items:center; justify-content:center; width:24px; height:24px;">+</span> <span style="font-size:0.75rem;">Cycle</span>`;
     newCycleBtn.addEventListener('click', () => {
-      if (confirm("Démarrer un nouveau cycle aujourd'hui ?")) {
+      if(confirm("Démarrer un nouveau cycle aujourd'hui ?")) {
         userSettings.cycleStart = new Date().toISOString().split('T')[0];
         saveData(); renderDailyNotes();
       }
@@ -573,7 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // INTERACTION
     cycleContainer.addEventListener('click', () => {
       speechBubble.classList.toggle('visible');
-      if (speechBubble.classList.contains('visible')) {
+      if(speechBubble.classList.contains('visible')) {
         setTimeout(() => speechBubble.classList.remove('visible'), 4000);
       }
     });
@@ -595,16 +981,16 @@ document.addEventListener('DOMContentLoaded', () => {
       </summary>
       <div class="options-grid" style="margin-top:20px; padding-top:15px; border-top:1px dashed #e2e8f0;">
         ${moodOptions.map(m => {
-      const isSel = todayEntry.moods.includes(m);
-      return `<button class="option-btn ${isSel ? 'selected' : ''}" data-mood="${m}">${m}</button>`;
-    }).join('')}
+          const isSel = todayEntry.moods.includes(m);
+          return `<button class="option-btn ${isSel ? 'selected' : ''}" data-mood="${m}">${m}</button>`;
+        }).join('')}
       </div>
     `;
 
     moodDetails.querySelectorAll('.option-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const m = btn.dataset.mood;
-        if (todayEntry.moods.includes(m)) {
+        if(todayEntry.moods.includes(m)) {
           todayEntry.moods = todayEntry.moods.filter(x => x !== m);
         } else {
           todayEntry.moods.push(m);
@@ -626,9 +1012,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const grads = ['#fce7f3', '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899'];
     painsConfig.forEach(p => {
       painHTML += `<div style="margin-bottom:25px;"><div style="margin-bottom:12px; font-weight:500; font-size:0.95rem;">${p.label}</div><div class="options-grid pain-scale" style="justify-content:space-between;">`;
-      [1, 2, 3, 4, 5].forEach((v, idx) => {
+      [1,2,3,4,5].forEach((v, idx) => {
         const isSel = todayEntry.symptomLevels[p.key] === v;
-        painHTML += `<button class="pain-btn" data-type="${p.key}" data-val="${v}" style="width:45px; height:45px; border-radius:50%; border:${isSel ? '2px solid #ffb3c6' : 'none'}; background:${grads[idx]}; opacity:${isSel ? 1 : 0.6}; transform:${isSel ? 'scale(1.1)' : 'scale(1)'}; cursor:pointer; font-weight:800;">${v}</button>`;
+        painHTML += `<button class="pain-btn" data-type="${p.key}" data-val="${v}" style="width:45px; height:45px; border-radius:50%; border:${isSel ? '2px solid #ffb3c6' : 'none'}; background:${grads[idx]}; opacity:${isSel?1:0.6}; transform:${isSel?'scale(1.1)':'scale(1)'}; cursor:pointer; font-weight:800;">${v}</button>`;
       });
       painHTML += `</div></div>`;
     });
@@ -646,11 +1032,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="custom-input-group" style="margin-top:20px;"><input type="text" id="custom-symptom-input" placeholder="Ajouter..."><button class="add-btn" id="btn-add-symptom">+</button></div>`;
     tabDailyNotes.appendChild(sympCard);
     sympCard.querySelectorAll('.option-btn').forEach(b => b.addEventListener('click', () => {
-      const s = b.dataset.symptom; if (todayEntry.symptoms.includes(s)) todayEntry.symptoms = todayEntry.symptoms.filter(x => x !== s); else todayEntry.symptoms.push(s); saveData(); renderDailyNotes();
+      const s = b.dataset.symptom; if(todayEntry.symptoms.includes(s)) todayEntry.symptoms = todayEntry.symptoms.filter(x => x !== s); else todayEntry.symptoms.push(s); saveData(); renderDailyNotes();
     }));
     document.getElementById('btn-add-symptom')?.addEventListener('click', () => {
       const v = document.getElementById('custom-symptom-input').value.trim();
-      if (v && !allS.includes(v)) { customSymptoms.push(v); todayEntry.symptoms.push(v); saveData(); renderDailyNotes(); }
+      if(v && !allS.includes(v)) { customSymptoms.push(v); todayEntry.symptoms.push(v); saveData(); renderDailyNotes(); }
     });
   }
 
@@ -763,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const circle = document.createElement('div');
       const isActive = count > 0;
       circle.style.cssText = `
-        width: 70px; height: 70px; border-radius: 50%; 
+        width: 70px; height: 70px; border-radius: 50%;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         background: ${isActive ? 'linear-gradient(135deg, #ff6b8b, #9d4edd)' : '#f1f5f9'};
         box-shadow: ${isActive ? '0 6px 12px rgba(255,107,139,0.2)' : 'none'};
@@ -820,8 +1206,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
           };
           const habitAvg = () => {
-            const vals = monthEntries.map(e => getHabitScore(e));
-            return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+             const vals = monthEntries.map(e => getHabitScore(e));
+             return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
           };
 
           data.push({
@@ -863,12 +1249,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="width:100%; overflow:hidden;">
           <svg viewBox="0 0 ${width} ${height}" width="100%" height="auto" style="overflow:visible;">
             ${[0, 1, 2, 3, 4, 5].map(v => `<line x1="${padding}" y1="${getY(v)}" x2="${width - padding}" y2="${getY(v)}" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="2,2" />`).join('')}
-            
+
             <!-- HABIT BARS -->
             ${data.map((d, i) => {
-        const h = getY(0) - getY(d.habits);
-        return `<rect x="${getX(i) - 8}" y="${getY(d.habits)}" width="16" height="${h}" fill="var(--primary)" fill-opacity="0.1" rx="4" />`;
-      }).join('')}
+              const h = getY(0) - getY(d.habits);
+              return `<rect x="${getX(i) - 8}" y="${getY(d.habits)}" width="16" height="${h}" fill="var(--primary)" fill-opacity="0.1" rx="4" />`;
+            }).join('')}
 
             ${createGraphElements('fatigue', '#3b82f6')}
             ${createGraphElements('douleur', '#ef4444')}

@@ -137,7 +137,48 @@ document.addEventListener('DOMContentLoaded', () => {
     popup.querySelector('#close-bubbly').onclick = () => overlay.remove();
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
   }
+  function showBubblyPopup(name, goal, color) {
 
+     const oldPopup = document.getElementById('bubbly-popup');
+     if (oldPopup) oldPopup.remove();
+
+     const popup = document.createElement('div');
+     popup.id = 'bubbly-popup';
+     popup.style.cssText = `
+     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+     background: white; padding: 20px 30px; border-radius: 30px;
+     box-shadow: 0 15px 30px rgba(0,0,0,0.1); z-index: 9999;
+     text-align: center; border: 3px solid ${color};
+     opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+     font-family: 'Outfit', sans-serif;
+   `;
+
+     popup.innerHTML = `
+     <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 5px;">Objectif quotidien</div>
+     <div style="font-size: 1.2rem; font-weight: 800; color: ${color}; margin-bottom: 10px;">${name}</div>
+     <div style="font-size: 1.1rem; font-weight: 600; color: #1e293b;">${goal} recommandées</div>
+     <button id="close-popup" style="margin-top: 15px; padding: 8px 15px; border: none; background: #f1f5f9; border-radius: 15px; cursor: pointer; color: #64748b; font-weight: 700;">OK</button>
+   `;
+
+     document.body.appendChild(popup);
+
+     setTimeout(() => {
+       popup.style.opacity = '1';
+       popup.style.transform = 'translate(-50%, -50%) scale(1)';
+     }, 10);
+
+     const close = () => {
+       popup.style.opacity = '0';
+       popup.style.transform = 'translate(-50%, -50%) scale(0.5)';
+       setTimeout(() => popup.remove(), 300);
+     };
+
+     popup.querySelector('#close-popup').onclick = close;
+     // Ferme aussi si on clique n'importe où ailleurs
+     setTimeout(() => window.addEventListener('click', function _f(e) {
+       if (!popup.contains(e.target)) { close(); window.removeEventListener('click', _f); }
+     }), 100);
+   }
   function showQuantityPopup(foodName, currentQty, onSave) {
     let qty = currentQty || 1;
     const overlay = document.createElement('div');
@@ -542,9 +583,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- SUIVI ALIMENTAIRE ---
   function getDietEntryForDate(entry) {
-    const defaultGoals = { "Boire 1.5 litre": false, "Une poignée d'amandes": false, "2 c. à s. de graines de chia": false, "2 c. à s. d'huile de noix": false };
-    const weeklyGoals = { "300 gr. de poisson gras": false, "Pas de café": false, "Pas d'alcool": false };
-    const activityGoals = { "5 min. cohérence cardiaque": false, "Exercices kiné": false, "30 min. de marche / piscine": false };
+    // MODIFIE ICI tes objectifs quotidiens (ceux qui apparaîtront dans l'onglet)
+      const defaultGoals = {
+        "Boire 1.5 litre": false,
+        "Une poignée d'amandes": false,
+        "2 c. à s. de graines de chia": false,
+        "2 c. à s. d'huile de noix": false
+      };
+
+      // MODIFIE ICI tes objectifs de mouvement / bien-être
+      const activityGoals = {
+        "5 min. cohérence cardiaque": false,
+        "Exercices kiné": false,
+        "30 min. de marche / piscine": false
+      };
 
     const defaultMealsData = {
       "Petit-déjeuner": { categories: { "Boisson": [], "Repas": [] }, digestionScale: null },
@@ -637,66 +689,35 @@ document.addEventListener('DOMContentLoaded', () => {
     return { ...baseColor, dotBg: baseColor.border, isGradient: false };
   }
 
-  function showBubblyPopup(name, goal, color) {
-
-    const oldPopup = document.getElementById('bubbly-popup');
-    if (oldPopup) oldPopup.remove();
-
-    const popup = document.createElement('div');
-    popup.id = 'bubbly-popup';
-    popup.style.cssText = `
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
-    background: white; padding: 20px 30px; border-radius: 30px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1); z-index: 9999;
-    text-align: center; border: 3px solid ${color};
-    opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    font-family: 'Outfit', sans-serif;
-  `;
-
-    popup.innerHTML = `
-    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 5px;">Objectif quotidien</div>
-    <div style="font-size: 1.2rem; font-weight: 800; color: ${color}; margin-bottom: 10px;">${name}</div>
-    <div style="font-size: 1.1rem; font-weight: 600; color: #1e293b;">${goal} recommandées</div>
-    <button id="close-popup" style="margin-top: 15px; padding: 8px 15px; border: none; background: #f1f5f9; border-radius: 15px; cursor: pointer; color: #64748b; font-weight: 700;">OK</button>
-  `;
-
-    document.body.appendChild(popup);
-
-    setTimeout(() => {
-      popup.style.opacity = '1';
-      popup.style.transform = 'translate(-50%, -50%) scale(1)';
-    }, 10);
-
-    const close = () => {
-      popup.style.opacity = '0';
-      popup.style.transform = 'translate(-50%, -50%) scale(0.5)';
-      setTimeout(() => popup.remove(), 300);
-    };
-
-    popup.querySelector('#close-popup').onclick = close;
-    // Ferme aussi si on clique n'importe où ailleurs
-    setTimeout(() => window.addEventListener('click', function _f(e) {
-      if (!popup.contains(e.target)) { close(); window.removeEventListener('click', _f); }
-    }), 100);
-  }
-
   function createFoodGoalsTracker() {
     const trackerContainer = document.createElement('div');
     trackerContainer.id = 'food-goals-tracker';
-    trackerContainer.style.cssText = 'display: flex; justify-content: space-around; gap: 10px; margin-bottom: 25px; padding: 10px 0;';
 
-    const icons = {
-      vegFruit: `<path d="M12 22s-7-1-7-8a7 7 0 0 1 14 0c0 7-7 8-7 8zM12 2v4M10 3s1 2 4 2" stroke="white" stroke-width="2" fill="none"/>`,
-      feculent: `<path d="M6 20s3-1 3-8-3-10-3-10M18 20s-3-1-3-8 3-10 3-10M12 4v16M8 8h8M8 12h8M8 16h8" stroke="white" stroke-width="2" fill="none"/>`,
-      proteine: `<path d="M18 10c0 6-4 10-4 10s-1 1-2 1-2-1-2-1-4-4-4-10 4-8 4-8 1-1 2-1 2 1 2 1 4 2 4 8z" stroke="white" stroke-width="2" fill="none"/><circle cx="12" cy="11" r="3" fill="white"/>`,
-      laitage: `<path d="M6 18h12l1-12H5l1 12zM8 22h8M9 6V2h6v4" stroke="white" stroke-width="2" fill="none"/>`
-    };
+    // Correction ici : margin-left négatif pour "coller" au bord de la carte
+    // et gap réduit pour gagner de la place à droite.
+    trackerContainer.style.cssText = `
+      display: flex;
+      justify-content: flex-start;
+      gap: 4px;
+      margin-bottom: 25px;
+      padding: 10px 0;
+      margin-left: -20px;
+      width: calc(100% + 15px);
+    `;
+
+    const circlesConfig = [
+      { id: 'vegFruit', name: 'Légumes & Fruits', emoji: '🍐', goal: '5 portions', color: '#10b981' },
+      { id: 'feculent', name: 'Féculents',      emoji: '🍚', goal: '2 portions', color: '#f59e0b' },
+      { id: 'proteine', name: 'Protéines',     emoji: '🍳', goal: '2 portions', color: '#ef4444' },
+      { id: 'laitage',  name: 'Laitages',      emoji: '🥛', goal: '2 portions', color: '#BAE6FD' },
+      { id: 'omega3',   name: 'Oméga-3',       emoji: '🐟', goal: '3 portions', color: '#facc15' }
+    ];
 
     const updateTracker = () => {
       const entry = getEntryForDate(selectedDate);
       const dietData = getDietEntryForDate(entry);
 
-      let counts = { legume: 0, fruit: 0, feculent: 0, proteine: 0, laitage: 0 };
+      let counts = { legume: 0, fruit: 0, feculent: 0, proteine: 0, laitage: 0, omega3: 0 };
 
       Object.values(dietData.meals).forEach(meal => {
         const allFoods = [...(meal.categories?.['Repas'] || []), ...(meal.categories?.['Boisson'] || [])];
@@ -714,60 +735,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      const scores = [
-        { name: 'Légumes & Fruits', val: ((Math.min(counts.legume, 3) + Math.min(counts.fruit, 2)) / 5) * 100, goal: '5 portions', color: '#10b981' },
-        { name: 'Féculents', val: (Math.min(counts.feculent, 2) / 2) * 100, goal: '2 portions', color: '#f59e0b' },
-        { name: 'Protéines', val: (Math.min(counts.proteine, 2) / 2) * 100, goal: '2 portions', color: '#ef4444' },
-        { name: 'Laitages', val: (Math.min(counts.laitage, 2) / 2) * 100, goal: '2 portions', color: '#BAE6FD' }
-      ];
+      const omegaFoods = ["Une poignée d'amandes", "2 c. à s. de graines de chia", "2 c. à s. d'huile de noix"];
+      omegaFoods.forEach(food => {
+        if (dietData.goals && dietData.goals[food] === true) counts.omega3 += 1;
+      });
+
+      const scores = circlesConfig.map(c => {
+        let val = 0;
+        if (c.id === 'vegFruit') val = ((Math.min(counts.legume, 3) + Math.min(counts.fruit, 2)) / 5) * 100;
+        else if (c.id === 'feculent') val = (Math.min(counts.feculent, 2) / 2) * 100;
+        else if (c.id === 'proteine') val = (Math.min(counts.proteine, 2) / 2) * 100;
+        else if (c.id === 'laitage')  val = (Math.min(counts.laitage, 2) / 2) * 100;
+        else if (c.id === 'omega3')   val = (Math.min(counts.omega3, 3) / 3) * 100;
+        return { ...c, val };
+      });
 
       trackerContainer.innerHTML = '';
 
-      scores.forEach((s, index) => {
-        const iconKey = Object.keys(icons)[index];
+      scores.forEach((s) => {
         const wrapper = document.createElement('div');
-        // Style du conteneur circulaire
         wrapper.style.cssText = `
-        position: relative;
-        width: 60px;
-        height: 60px;
-        cursor: pointer;
-        border-radius: 50%;
-        overflow: hidden;
-        background: #e2e8f0;
-        transition: transform 0.2s ease;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      `;
+          position: relative;
+          width: 48px; height: 48px;
+          min-width: 48px; min-height: 48px;
+          flex-shrink: 0;
+          cursor: pointer;
+          border-radius: 50%;
+          overflow: hidden;
+          background: #f8fafc; /* Un gris encore plus léger pour le fond */
+          border: 1.5px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
 
         wrapper.onclick = () => showBubblyPopup(s.name, s.goal, s.color);
-        wrapper.onmousedown = () => wrapper.style.transform = 'scale(0.95)';
-        wrapper.onmouseup = () => wrapper.style.transform = 'scale(1)';
 
         const liquid = document.createElement('div');
         liquid.style.cssText = `
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: ${s.val}%;
-        background-color: ${s.color};
-        transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1;
-      `;
+          position: absolute; bottom: 0; left: 0; width: 100%;
+          height: ${s.val}%; background-color: ${s.color};
+          transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
+        `;
 
-        const iconContainer = document.createElement('div');
-        iconContainer.style.cssText = `
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; align-items: center; justify-content: center;
-        z-index: 2;
-        pointer-events: none;
-      `;
-
-        iconContainer.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">${icons[iconKey]}</svg>`;
+        const emojiContainer = document.createElement('div');
+        emojiContainer.style.cssText = `
+          position: relative;
+          z-index: 2;
+          pointer-events: none;
+          font-size: 1.3rem;
+          filter: ${s.val > 0 ? 'none' : 'grayscale(100%) opacity(0.4)'};
+        `;
+        emojiContainer.textContent = s.emoji;
 
         wrapper.appendChild(liquid);
-        wrapper.appendChild(iconContainer);
+        wrapper.appendChild(emojiContainer);
         trackerContainer.appendChild(wrapper);
       });
     };
@@ -1208,26 +1230,121 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderDietTracking() {
     if (!tabDiet) return;
-
-    // On vide l'onglet (selectedDate est globale)
     tabDiet.innerHTML = '';
 
     const entry = getEntryForDate(selectedDate);
 
-    // 1. LE BLOC OBJECTIFS (Beige, Large)
-    renderTaskConsole(tabDiet, entry);
+    // --- NOUVEAU : On appelle la fonction qui crée le bloc à onglets ---
+    const tabbedBox = createTabbedGoalsSystem(entry);
+    tabDiet.appendChild(tabbedBox);
 
-    // 2. LE TRACKER D'ICÔNES (Légumes, Protéines...)
-    tabDiet.appendChild(createFoodGoalsTracker());
-
-    // 3. LES REPAS (Appel de ta fonction complexe)
+    // 2. LES REPAS (Le reste ne change pas)
     const mealNames = ["Petit-déjeuner", "Déjeuner", "Goûter", "Dîner"];
-
     mealNames.forEach(mealName => {
-      // On appelle TA fonction qui génère le SVG et les couleurs
       const mealElement = createMealAccordion(mealName);
       tabDiet.appendChild(mealElement);
     });
+  }
+
+  function createTabbedGoalsSystem(entry) {
+    const container = document.createElement('div');
+    container.className = 'card';
+    container.style.cssText = 'padding:0; overflow:hidden; margin-bottom:20px; border:1px solid #e2e8f0; background:#fff; border-radius:24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #f1f5f9; background:#fff;';
+
+    const title = document.createElement('h3');
+    title.textContent = 'Objectifs';
+    title.style.cssText = 'margin:0; font-size:1.1rem; font-weight:700; color:#1e293b;';
+    header.appendChild(title);
+
+    const tabsContainer = document.createElement('div');
+    tabsContainer.style.cssText = 'display:flex; gap:4px; background:#fafafa; padding:4px; border-radius:18px; border:1px solid #f1f5f9;';
+
+    // --- LES 4 ICÔNES SVG ---
+    const icons = {
+      nutrition: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M12 12l8-8M12 12l-8 8M12 12l8 8M12 12l-8-8"/></svg>', // Assiette/Nutriments
+      water: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="2" x2="6" y2="5"></line></svg>', // Tasse
+      day: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><polyline points="9 16 11 18 15 14"></polyline><line x1="3" y1="10" x2="21" y2="10"></line></svg>', // Jour
+      week: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>' // Semaine
+    };
+
+    const tabs = [
+      { id: 'nutrition', label: 'Alimentation', icon: icons.nutrition },
+      { id: 'water', label: 'Hydratation', icon: icons.water },
+      { id: 'day', label: 'Mouvement Jour', icon: icons.day },
+      { id: 'week', label: 'Mouvement Semaine', icon: icons.week }
+    ];
+    const tabButtons = [];
+
+    const contentArea = document.createElement('div');
+    contentArea.style.padding = '20px';
+
+    tabs.forEach((tab, index) => {
+      const btn = document.createElement('button');
+      btn.innerHTML = tab.icon;
+      btn.title = tab.label;
+      btn.style.cssText = `
+        display:flex; align-items:center; justify-content:center;
+        width:38px; height:38px; border:none; border-radius:12px; cursor:pointer;
+        transition:all 0.2s; background:${index === 0 ? '#f1f5f9' : 'transparent'};
+        color:${index === 0 ? 'var(--primary)' : '#94a3b8'};
+      `;
+
+      btn.onclick = () => {
+        tabButtons.forEach(b => { b.style.background = 'transparent'; b.style.color = '#94a3b8'; });
+        btn.style.background = '#f1f5f9';
+        btn.style.color = 'var(--primary)';
+        renderInnerGoalTab(tab.id, contentArea, entry);
+      };
+
+      tabButtons.push(btn);
+      tabsContainer.appendChild(btn);
+    });
+
+    header.appendChild(tabsContainer);
+    container.appendChild(header);
+    container.appendChild(contentArea);
+
+    renderInnerGoalTab('nutrition', contentArea, entry);
+    return container;
+  }
+
+  function renderInnerGoalTab(tabId, container, entry) {
+    container.innerHTML = '';
+    const dietData = getDietEntryForDate(entry);
+
+    if (tabId === 'nutrition') {
+      // ONGLET 1 : LES CERCLES (Légumes, Protéines, etc.)
+      const circles = createFoodGoalsTracker();
+      circles.style.boxShadow = 'none'; circles.style.margin = '0'; circles.style.border = 'none';
+      container.appendChild(circles);
+
+    } else if (tabId === 'water') {
+      // ONGLET 2 : HYDRATATION & OMÉGA-3 (Le "gras" sain)
+      const wrapper = document.createElement('div');
+      // On peut utiliser renderGoals ici pour tes objectifs d'huile, chia, eau...
+      renderGoals(wrapper, dietData.goals, "💧 Hydratation & Oméga-3");
+      container.appendChild(wrapper);
+
+    } else if (tabId === 'day') {
+      // ONGLET 3 : MOUVEMENT QUOTIDIEN
+      const wrapper = document.createElement('div');
+      renderGoals(wrapper, dietData.activityGoals, "🏃‍♀️ Activité du jour");
+      container.appendChild(wrapper);
+
+    } else if (tabId === 'week') {
+      // ONGLET 4 : OBJECTIFS HEBDO
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.gap = '15px';
+
+      renderGoals(wrapper, dietData.weeklyGoals, "📅 Nutrition Semaine");
+      renderGoals(wrapper, dietData.activityWeeklyGoals, "🔥 Sport Semaine");
+      container.appendChild(wrapper);
+    }
   }
 
   function renderRecipes(query = "") {
@@ -1504,7 +1621,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnShowRecipeForm.textContent = '+ Créer une recette';
     });
 
-  } // <--- C'EST CETTE ACCOLADE QUI FERME LA FONCTION PRINCIPALE
+  }
 
   function renderDailyNotes() {
     if (!tabDailyNotes) return;

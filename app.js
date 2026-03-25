@@ -1954,45 +1954,114 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderHistoryNotes() {
-    const container = document.getElementById('history-notes-container');
-    if (!container) return;
-    container.innerHTML = "";
-    const sortedHistory = [...appData.history].sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (sortedHistory.length === 0) {
-      container.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Aucune donnée enregistrée pour le moment.</p>";
-      return;
-    }
-    sortedHistory.forEach(entry => {
-      const dateObj = new Date(entry.date + "T00:00:00");
-      const dateLabel = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-      const moods = entry.moods && entry.moods.length > 0 ? entry.moods : (entry.mood ? [entry.mood] : []);
-      const moodsHTML = moods.map(m => `<span class="history-tag mood-tag">${m}</span>`).join('');
-      const symptomsHTML = entry.symptoms && entry.symptoms.length > 0
-        ? entry.symptoms.map(s => `<span class="history-tag symp-tag">${s}</span>`).join('')
-        : "";
-      let allFoods = [];
-      if (entry.diet && entry.diet.meals) {
-        Object.values(entry.diet.meals).forEach(meal => {
-          if (meal.categories) {
-            Object.values(meal.categories).forEach(items => {
-              allFoods = allFoods.concat(items);
-            });
-          }
-        });
+      const container = document.getElementById('history-notes-container');
+      if (!container) return;
+      container.innerHTML = "";
+
+      const sortedHistory = [...appData.history]
+          .filter(entry => {
+              const hasMood = (entry.moods && entry.moods.length > 0);
+              const hasSymptoms = (entry.symptoms && entry.symptoms.length > 0);
+              const hasLevels = entry.symptomLevels && Object.values(entry.symptomLevels).some(v => v !== null);
+              return hasMood || hasSymptoms || hasLevels;
+          })
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (sortedHistory.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Aucune note enregistrée.</p>";
+          return;
       }
-      const foodsHTML = allFoods.length > 0 ? `<p class="history-foods">🍴 ${allFoods.join(', ')}</p>` : "";
-      const card = document.createElement('div');
-      card.className = 'history-summary-card';
-      card.innerHTML = `
-        <div class="history-card-header"><span class="history-date">${dateLabel}</span></div>
-        <div class="history-card-body">
-          <div class="history-tags-row">${moodsHTML}</div>
-          <div class="history-tags-row">${symptomsHTML}</div>
-          ${foodsHTML}
-        </div>
-      `;
-      container.appendChild(card);
-    });
+
+      const masterDetails = document.createElement('details');
+      masterDetails.className = 'master-history-details';
+      masterDetails.innerHTML = `<summary class="master-summary">Voir les notes récapitulatives</summary>`;
+
+      const listContainer = document.createElement('div');
+      listContainer.className = 'history-list-inner';
+
+      sortedHistory.forEach(entry => {
+          const [year, month, day] = entry.date.split('-');
+          const shortDate = `${day}/${month}/${year.slice(-2)}`;
+
+          // --- SCORES (Ronds) ---
+          const levels = entry.symptomLevels || {};
+          let scoresHTML = '<div class="history-score-circles">';
+          const configs = [{k:'fatigue',c:'fatigue'},{k:'pelvic',c:'pain'},{k:'discomfort',c:'digest'}];
+          configs.forEach(conf => {
+              const val = levels[conf.k];
+              if (val && val > 0) scoresHTML += `<span class="score-circle circle-${conf.c}-${val}">${val}</span>`;
+          });
+          scoresHTML += '</div>';
+
+          // --- TRI ALIMENTS VS BOISSONS VIA DATABASE ---
+          let foodCounts = {};
+          let drinkCounts = {};
+
+          if (entry.diet && entry.diet.meals) {
+              Object.values(entry.diet.meals).forEach(meal => {
+                  if (meal.categories) {
+                      Object.values(meal.categories).forEach(items => {
+                          items.forEach(item => {
+                              if (!item) return;
+                              let name = typeof item === 'object' ? item.name : item;
+                              let qty = typeof item === 'object' ? (parseInt(item.qty) || 1) : 1;
+
+                              // Nettoyage si format texte ancien
+                              if (typeof item === 'string') {
+                                  const match = item.match(/^(.*)\s\((\d+)\)$/);
+                                  if (match) { name = match[1].trim(); qty = parseInt(match[2]); }
+                              }
+                              name = name.trim();
+
+                              // VERIFICATION DANS LA DATABASE
+                              // On cherche l'aliment dans foodDatabase ou staticRecipes
+                              const db = (typeof foodDatabase !== 'undefined') ? foodDatabase : (typeof staticRecipes !== 'undefined' ? staticRecipes : []);
+                              const foodInfo = db.find(f => (f.name || f.title) === name);
+
+                              // Est-ce une boisson ? (On vérifie la propriété boisson ou le type)
+                              const isDrink = foodInfo && (foodInfo.boisson === true || foodInfo.type === 'Boisson');
+
+                              if (isDrink) {
+                                  drinkCounts[name] = (drinkCounts[name] || 0) + qty;
+                              } else {
+                                  foodCounts[name] = (foodCounts[name] || 0) + qty;
+                              }
+                          });
+                      });
+                  }
+              });
+          }
+
+          const formatList = (obj) => Object.entries(obj)
+              .map(([name, count]) => count > 1 ? `${name} (${count})` : name)
+              .join(', ');
+
+          const drinksText = formatList(drinkCounts);
+          const foodsText = formatList(foodCounts);
+
+          let dietHTML = "";
+          if (drinksText) dietHTML += `<div class="history-diet-row"><strong>☕ Boissons :</strong> ${drinksText}</div>`;
+          if (foodsText) dietHTML += `<div class="history-diet-row"><strong>🍴 Aliments :</strong> ${foodsText}</div>`;
+
+          // --- RENDU ---
+          const dayDetails = document.createElement('details');
+          dayDetails.className = 'history-day-item';
+          dayDetails.innerHTML = `
+              <summary class="day-summary">
+                  <span class="history-date">${shortDate}</span>
+                  ${scoresHTML}
+              </summary>
+              <div class="day-content">
+                  <div class="tag-group">${(entry.moods || []).map(m => `<span class="tag mood">${m}</span>`).join('')}</div>
+                  <div class="tag-group">${(entry.symptoms || []).map(s => `<span class="tag symp">${s}</span>`).join('')}</div>
+                  <div class="history-food-list">${dietHTML}</div>
+              </div>
+          `;
+          listContainer.appendChild(dayDetails);
+      });
+
+      masterDetails.appendChild(listContainer);
+      container.appendChild(masterDetails);
   }
 
   function renderTaskConsole(container, entry) {

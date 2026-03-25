@@ -1395,3 +1395,145 @@ summary::-webkit-details-marker {
   background: var(--primary);
   color: white;
 }
+
+/* --- NOUVEAU STYLE HISTORIQUE --- */
+
+/* Le grand bouton déroulant principal */
+.master-history-details {
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.master-summary {
+    padding: 15px;
+    font-weight: 800;
+    color: var(--primary);
+    cursor: pointer;
+    text-align: center;
+    list-style: none;
+    background: #ffffff;
+}
+.master-summary::-webkit-details-marker { display: none; }
+
+.history-list-inner { padding: 10px; }
+
+/* Chaque ligne de jour à l'intérieur */
+.history-day-item {
+    background: white;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+    list-style: none;
+}
+
+.day-summary {
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+}
+.day-summary::-webkit-details-marker { display: none; }
+
+.history-date {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Les ronds de couleur (Badges) */
+.history-score-circles { display: flex; gap: 6px; }
+
+.score-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+}
+
+/* Fatigue (Bleu clair à foncé) */
+.circle-fatigue-1 { background: #e0f2fe; color: #0369a1; }
+.circle-fatigue-2 { background: #bae6fd; color: #0369a1; }
+.circle-fatigue-3 { background: #7dd3fc; color: #ffffff; }
+.circle-fatigue-4 { background: #38bdf8; color: #ffffff; }
+.circle-fatigue-5 { background: #0284c7; color: #ffffff; }
+
+/* Douleur (Rouge clair à foncé) */
+.circle-pain-1 { background: #fee2e2; color: #991b1b; }
+.circle-pain-2 { background: #fecaca; color: #991b1b; }
+.circle-pain-3 { background: #f87171; color: #ffffff; }
+.circle-pain-4 { background: #ef4444; color: #ffffff; }
+.circle-pain-5 { background: #b91c1c; color: #ffffff; }
+
+/* Digestion (Orange clair à foncé) */
+.circle-digest-1 { background: #ffedd5; color: #9a3412; }
+.circle-digest-2 { background: #fed7aa; color: #9a3412; }
+.circle-digest-3 { background: #fdba74; color: #ffffff; }
+.circle-digest-4 { background: #fb923c; color: #ffffff; }
+.circle-digest-5 { background: #ea580c; color: #ffffff; }
+
+/* Contenu intérieur */
+.day-content {
+    padding: 15px;
+    border-top: 1px dashed #eee;
+    font-size: 0.85rem;
+    background: #fafafa;
+}
+
+.tag-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.tag { padding: 3px 10px; border-radius: 15px; font-weight: 600; font-size: 0.75rem; }
+.tag.mood { background: #fef3c7; color: #92400e; }
+.tag.symp { background: #f1f5f9; color: #475569; }
+
+.history-food-list {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    line-height: 1.5;
+}
+
+.food-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    margin: 4px;
+    border-radius: 20px;
+    border: 1px solid;
+    font-size: 0.85rem;
+    transition: transform 0.1s;
+}
+.food-tag:active { transform: scale(0.96); }
+.remove-tag:hover { color: red; opacity: 1 !important; }
+
+.history-diet-row {
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.history-diet-row strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.history-food-list {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+#history-graph-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important; /* Juste un peu d'air au dessus/dessous */
+}

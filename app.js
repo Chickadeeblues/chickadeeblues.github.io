@@ -2,8 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabDailyNotes = document.getElementById('tab-daily-notes');
   const tabDiet = document.getElementById('tab-diet');
   const tabHistory = document.getElementById('tab-history');
+  const tabRecipes = document.getElementById('tab-recipes');
   const tabSettings = document.getElementById('tab-settings');
-  const tabsOrder = ['tab-daily-notes', 'tab-diet', 'tab-history', 'tab-settings'];
+  const tabsOrder = ['tab-daily-notes', 'tab-diet', 'tab-recipes', 'tab-history', 'tab-settings'];
 
   function switchToTab(targetId) {
     document.querySelectorAll('.nav-item').forEach(n => {
@@ -13,8 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
       tab.classList.toggle('active', tab.id === targetId);
     });
     if (targetId === 'tab-diet') renderDietTracking();
+    if (targetId === 'tab-recipes') renderRecipes();
     if (targetId === 'tab-daily-notes') renderDailyNotes();
-    if (targetId === 'tab-history') renderHistory();
+    if (targetId === 'tab-history') {
+      renderHistoryStreaks();
+      renderHistoryGraph();
+      renderHistoryNotes();
+    }
   }
 
   // Navigation
@@ -50,6 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.autocomplete-list').forEach(list => list.innerHTML = '');
     }
   });
+
+  // Search recipes listener
+  document.getElementById('main-search-bar')?.addEventListener('input', (e) => {
+    renderRecipes(e.target.value);
+  });
   // Data Setup
   const moodOptions = ["Heureuse", "Confiante", "Stressée", "Anxieuse", "Déprimée", "Irritable", "Déconcentrée"];
   const predefinedSymptoms = ["Crampes utérines", "Douleurs lombaires", "Jambes lourdes", "Nausées", "Constipation", "Diarrhée", "Migraine", "Jambes fantômes", "Acné"];
@@ -57,6 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let userSettings = JSON.parse(localStorage.getItem('endocute_userSettings')) || null;
   let appData = JSON.parse(localStorage.getItem('endocuteData')) || { history: [] };
   let customSymptoms = JSON.parse(localStorage.getItem('endocuteCustomSymptoms')) || [];
+
+  // Recipes Data
+  const staticRecipes = [
+    { id: 1, title: "Salade de Quinoa", type: "Déjeuner", prepTime: "20 min", ingredients: ["Quinoa", "Concombre", "Tomate", "Feta"], steps: ["Rincer le quinoa.", "Cuire 12 min à l'eau bouillante salée.", "Couper les légumes en dés.", "Mélanger le tout avec une touche d'huile d'olive."], isPerfectRecipe: true, isGlutenFree: true, isVegan: false }
+  ];
+  let customRecipes = JSON.parse(localStorage.getItem('endocuteCustomRecipes')) || [];
+  let fullRecipeDatabase = [...staticRecipes, ...customRecipes];
 
   // Date de travail globale (par défaut aujourd'hui)
   let selectedDate = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD local
@@ -66,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('endocute_userSettings', JSON.stringify(userSettings));
     localStorage.setItem('endocuteData', JSON.stringify(appData));
     localStorage.setItem('endocuteCustomSymptoms', JSON.stringify(customSymptoms));
+    localStorage.setItem('endocuteCustomRecipes', JSON.stringify(customRecipes));
   }
 
   function getEntryForDate(dateStr) {
@@ -1213,6 +1232,76 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderRecipes(query = "") {
+    if (!tabRecipes) return;
+    const recipeContainer = document.getElementById('recipe-results-container');
+    if (!recipeContainer) return;
+
+    recipeContainer.innerHTML = "";
+    const searchVal = query.toLowerCase().trim();
+
+    const filteredRecipes = fullRecipeDatabase.filter(r =>
+      r.title.toLowerCase().includes(searchVal) ||
+      r.type.toLowerCase().includes(searchVal) ||
+      r.ingredients.some(i => i.toLowerCase().includes(searchVal))
+    );
+
+    if (filteredRecipes.length === 0) {
+      recipeContainer.innerHTML = "<p class='no-result'>Aucune recette trouvée...</p>";
+      return;
+    }
+
+    filteredRecipes.forEach(recipe => {
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
+
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="recipe-type">${recipe.type}</span>
+          ${recipe.isPerfectRecipe ? '<span class="badge-perfect">✨ Recette Parfaite</span>' : ''}
+        </div>
+
+        <h2 class="recipe-title">${recipe.title}</h2>
+
+        <div class="recipe-meta">
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" /></svg>
+            <span>${recipe.prepTime}</span>
+          </div>
+          <div class="recipe-icons">
+            ${recipe.isGlutenFree ? '<span class="icon-tag gf" title="Sans Gluten">GF</span>' : ''}
+            ${recipe.isVegan ? '<span class="icon-tag v" title="Vegan">V</span>' : ''}
+          </div>
+        </div>
+
+        <div class="recipe-content">
+          <div style="margin-bottom:15px;">
+            <strong style="color:#1e293b; font-size:0.95rem;">Ingrédients :</strong>
+            <p class="small-text">${recipe.ingredients.join(', ')}</p>
+          </div>
+
+          <button class="btn-details" data-id="${recipe.id}">Voir les étapes</button>
+
+          <div id="steps-${recipe.id}" class="steps-hidden" style="display:none;">
+            <ol>
+              ${recipe.steps.map(step => `<li>${step}</li>`).join('')}
+            </ol>
+          </div>
+        </div>
+      `;
+
+      card.querySelector('.btn-details').onclick = (e) => {
+        const id = e.target.dataset.id;
+        const stepsDiv = document.getElementById(`steps-${id}`);
+        const isHidden = stepsDiv.style.display === 'none';
+        stepsDiv.style.display = isHidden ? 'block' : 'none';
+        e.target.textContent = isHidden ? 'Masquer les étapes' : 'Voir les étapes';
+      };
+
+      recipeContainer.appendChild(card);
+    });
+  }
+
   function renderSettings() {
     tabSettings.innerHTML = '';
 
@@ -1288,7 +1377,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <option value="graine">Graine / Fruit sec</option>
           <option value="assaisonnement">Assaisonnement</option>
           <option value="boisson">Boisson</option>
-          <option value="sucre">Produit sucrant</option>
           <option value="autre">Autre (Snack, Plat préparé...)</option>
         </select>
 
@@ -1304,6 +1392,61 @@ document.addEventListener('DOMContentLoaded', () => {
     foodDetails.appendChild(foodSummary);
     foodDetails.appendChild(foodContent);
     settingsContainer.appendChild(foodDetails);
+
+    // 3. Mes Recettes Accordion
+    const recipeSettingsDetails = document.createElement('details');
+    recipeSettingsDetails.className = 'card meal-accordion-card';
+
+    const recipeSettingsSummary = document.createElement('summary');
+    recipeSettingsSummary.style.cssText = 'font-weight:700; font-size:1.1rem; color:#5d5a55; display:flex; justify-content:space-between; align-items:center; outline:none; cursor:pointer; list-style:none; padding:10px 0;';
+    recipeSettingsSummary.innerHTML = `<span>Mes Recettes</span>`;
+
+    const recipeSettingsContent = document.createElement('div');
+    recipeSettingsContent.style.marginTop = '20px';
+
+    recipeSettingsContent.innerHTML = `
+      <button id="btn-show-recipe-form" class="primary" style="width:100%; margin-bottom:15px; background:var(--bg-card); color:var(--primary); border:2px solid var(--primary);">+ Créer une recette</button>
+
+      <div id="new-recipe-form-container" style="display:none; background:#f8fafc; padding:20px; border-radius:20px; border:1px solid #e2e8f0;">
+        <h4 style="margin-bottom:15px; color:#475569;">Nouvelle Recette</h4>
+
+        <input type="text" id="recipe-title" placeholder="Nom de la recette" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; font-weight:600;">
+
+        <select id="recipe-type" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
+          <option value="Petit-déjeuner">Petit-déjeuner</option>
+          <option value="Déjeuner" selected>Déjeuner</option>
+          <option value="Dîner">Dîner</option>
+          <option value="Collation / Goûter">Collation / Goûter</option>
+          <option value="Boisson / Smoothie">Boisson / Smoothie</option>
+        </select>
+
+        <input type="text" id="recipe-prep" placeholder="Temps (ex: 15 min)" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
+
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
+            <input type="checkbox" id="recipe-gf"> Gluten Free
+          </label>
+          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
+            <input type="checkbox" id="recipe-vegan"> Vegan
+          </label>
+          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
+            <input type="checkbox" id="recipe-perfect"> Parfaite ✨
+          </label>
+        </div>
+
+        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Ingrédients (séparés par une virgule)</label>
+        <textarea id="recipe-ingredients" placeholder="Quinoa, Avocat, Citron..." style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:80px;"></textarea>
+
+        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Étapes (une par ligne)</label>
+        <textarea id="recipe-steps" placeholder="Étape 1 : Cuire...\nÉtape 2 : Couper..." style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:100px;"></textarea>
+
+        <button id="btn-save-recipe" class="primary" style="width:100%;">Enregistrer la recette</button>
+      </div>
+    `;
+
+    recipeSettingsDetails.appendChild(recipeSettingsSummary);
+    recipeSettingsDetails.appendChild(recipeSettingsContent);
+    settingsContainer.appendChild(recipeSettingsDetails);
 
     tabSettings.appendChild(settingsContainer);
 
@@ -1321,13 +1464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Event Listeners for Food Customization
-    const btnShowForm = foodContent.querySelector('#btn-show-food-form');
-    const formContainer = foodContent.querySelector('#new-food-form-container');
+    const btnShowFoodForm = foodContent.querySelector('#btn-show-food-form');
+    const foodFormContainer = foodContent.querySelector('#new-food-form-container');
 
-    btnShowForm.addEventListener('click', () => {
-      const isHidden = formContainer.style.display === 'none';
-      formContainer.style.display = isHidden ? 'block' : 'none';
-      btnShowForm.textContent = isHidden ? 'Fermer le formulaire' : '+ Ajouter un aliment';
+    btnShowFoodForm.addEventListener('click', () => {
+      const isHidden = foodFormContainer.style.display === 'none';
+      foodFormContainer.style.display = isHidden ? 'block' : 'none';
+      btnShowFoodForm.textContent = isHidden ? 'Fermer le formulaire' : '+ Ajouter un aliment';
     });
 
     foodContent.querySelector('#btn-save-food').addEventListener('click', () => {
@@ -1360,9 +1503,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sauvegarde dans le LocalStorage et dans la BDD active
       foodDatabase.push(newFood);
 
-      let customFoods = JSON.parse(localStorage.getItem('endocuteCustomFoods')) || [];
-      customFoods.push(newFood);
-      localStorage.setItem('endocuteCustomFoods', JSON.stringify(customFoods));
+      let sysCustomFoods = JSON.parse(localStorage.getItem('endocuteCustomFoods')) || [];
+      sysCustomFoods.push(newFood);
+      localStorage.setItem('endocuteCustomFoods', JSON.stringify(sysCustomFoods));
 
       showSimplePopup("Succès", `L'aliment "${nameVal}" a été ajouté !`, "#4ade80");
 
@@ -1371,8 +1514,63 @@ document.addEventListener('DOMContentLoaded', () => {
       typeSelect.value = 'neutre';
       catSelect.value = 'legume';
       gfCheck.checked = false;
-      formContainer.style.display = 'none';
-      btnShowForm.textContent = '+ Ajouter un aliment';
+      foodFormContainer.style.display = 'none';
+      btnShowFoodForm.textContent = '+ Ajouter un aliment';
+    });
+
+    // Event Listeners for Recipe Customization
+    const btnShowRecipeForm = recipeSettingsContent.querySelector('#btn-show-recipe-form');
+    const recipeFormContainer = recipeSettingsContent.querySelector('#new-recipe-form-container');
+
+    btnShowRecipeForm.addEventListener('click', () => {
+      const isHidden = recipeFormContainer.style.display === 'none';
+      recipeFormContainer.style.display = isHidden ? 'block' : 'none';
+      btnShowRecipeForm.textContent = isHidden ? 'Fermer le formulaire' : '+ Créer une recette';
+    });
+
+    recipeSettingsContent.querySelector('#btn-save-recipe').addEventListener('click', () => {
+      const title = document.getElementById('recipe-title').value.trim();
+      const type = document.getElementById('recipe-type').value;
+      const prep = document.getElementById('recipe-prep').value.trim();
+      const isGf = document.getElementById('recipe-gf').checked;
+      const isVegan = document.getElementById('recipe-vegan').checked;
+      const isPerfect = document.getElementById('recipe-perfect').checked;
+      const ingreds = document.getElementById('recipe-ingredients').value.split(',').map(i => i.trim()).filter(i => i);
+      const steps = document.getElementById('recipe-steps').value.split('\n').map(s => s.trim()).filter(s => s);
+
+      if (!title || ingreds.length === 0 || steps.length === 0) {
+        showSimplePopup("Erreur", "Veuillez remplir le titre, ingrédients et étapes.", "#f43f5e");
+        return;
+      }
+
+      const newRecipe = {
+        id: Date.now(),
+        title,
+        type,
+        prepTime: prep || "N/A",
+        isGlutenFree: isGf,
+        isVegan: isVegan,
+        isPerfectRecipe: isPerfect,
+        ingredients: ingreds,
+        steps: steps
+      };
+
+      customRecipes.push(newRecipe);
+      fullRecipeDatabase = [...staticRecipes, ...customRecipes];
+      saveData();
+
+      showSimplePopup("Succès", `Recette "${title}" enregistrée !`, "#4ade80");
+
+      // Reset form
+      document.getElementById('recipe-title').value = '';
+      document.getElementById('recipe-prep').value = '';
+      document.getElementById('recipe-gf').checked = false;
+      document.getElementById('recipe-vegan').checked = false;
+      document.getElementById('recipe-perfect').checked = false;
+      document.getElementById('recipe-ingredients').value = '';
+      document.getElementById('recipe-steps').value = '';
+      recipeFormContainer.style.display = 'none';
+      btnShowRecipeForm.textContent = '+ Créer une recette';
     });
   }
 
@@ -1661,24 +1859,20 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.max(0, Math.min(5, score));
   }
 
-  function renderHistory() {
-    if (!tabHistory) return;
-    tabHistory.innerHTML = '<h2 class="section-title">Historique</h2>';
-
-    // On ne garde que les cercles de score (Streaks) ici
+  function renderHistoryStreaks() {
+    const container = document.getElementById('history-streaks-container');
+    if (!container) return;
+    container.innerHTML = '';
     const myStreaks = [
       { label: 'Jours', count: calculateDailyStreak() },
       { label: 'Semaines', count: calculateWeeklyStreak() }
     ];
-    renderStreakCircles(tabHistory, myStreaks);
-
-    // Le reste du code de l'historique (graphique, notes récapitulatives)
+    renderStreakCircles(container, myStreaks);
   }
 
   function renderStreakCircles(container, streaksData) {
     const streakContainer = document.createElement('div');
     streakContainer.className = 'streak-container';
-    // Utilisation de flex-wrap au cas où tu ajouterais beaucoup de cercles
     streakContainer.style.cssText = `
         display: flex;
         justify-content: flex-end;
@@ -1691,9 +1885,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const createStreakCircle = (label, count) => {
       const circle = document.createElement('div');
       const isActive = count > 0;
-
-      // --- GESTION DU PLURIEL ---
-      // On enlève le "s" final si le compte est <= 1
       const formattedLabel = count <= 1 ? label.replace(/s$/, '') : label;
 
       circle.style.cssText = `
@@ -1715,12 +1906,93 @@ document.addEventListener('DOMContentLoaded', () => {
       return circle;
     };
 
-    // Génération dynamique de tous les streaks fournis
     streaksData.forEach(item => {
       streakContainer.appendChild(createStreakCircle(item.label, item.count));
     });
 
     container.appendChild(streakContainer);
+  }
+
+  function renderHistoryGraph() {
+    const container = document.getElementById('history-graph-container');
+    if (!container) return;
+    container.innerHTML = "";
+    const last6Days = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      last6Days.push(d.toLocaleDateString('sv-SE'));
+    }
+    last6Days.forEach(dateStr => {
+      const entry = appData.history.find(e => e.date === dateStr);
+      let level = 0;
+      if (entry && entry.symptomLevels) {
+        const levels = Object.values(entry.symptomLevels).filter(v => v !== null);
+        level = levels.length > 0 ? Math.max(...levels) : 0;
+      }
+      const dayName = new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+      const barWrapper = document.createElement('div');
+      barWrapper.className = 'graph-bar-wrapper';
+      const heightPercent = (level / 5) * 100;
+      barWrapper.innerHTML = `
+        <div class="graph-bar-container">
+          <div class="graph-bar-fill" style="height: ${heightPercent}%; background: ${getBarColor(level)}">
+            ${level > 0 ? `<span class="bar-value">${level}</span>` : ''}
+          </div>
+        </div>
+        <span class="graph-day-label">${dayName}</span>
+      `;
+      container.appendChild(barWrapper);
+    });
+  }
+
+  function getBarColor(level) {
+    if (level >= 4) return '#f43f5e';
+    if (level >= 2) return '#fb923c';
+    if (level > 0) return '#4ade80';
+    return '#e2e8f0';
+  }
+
+  function renderHistoryNotes() {
+    const container = document.getElementById('history-notes-container');
+    if (!container) return;
+    container.innerHTML = "";
+    const sortedHistory = [...appData.history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (sortedHistory.length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Aucune donnée enregistrée pour le moment.</p>";
+      return;
+    }
+    sortedHistory.forEach(entry => {
+      const dateObj = new Date(entry.date + "T00:00:00");
+      const dateLabel = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      const moods = entry.moods && entry.moods.length > 0 ? entry.moods : (entry.mood ? [entry.mood] : []);
+      const moodsHTML = moods.map(m => `<span class="history-tag mood-tag">${m}</span>`).join('');
+      const symptomsHTML = entry.symptoms && entry.symptoms.length > 0
+        ? entry.symptoms.map(s => `<span class="history-tag symp-tag">${s}</span>`).join('')
+        : "";
+      let allFoods = [];
+      if (entry.diet && entry.diet.meals) {
+        Object.values(entry.diet.meals).forEach(meal => {
+          if (meal.categories) {
+            Object.values(meal.categories).forEach(items => {
+              allFoods = allFoods.concat(items);
+            });
+          }
+        });
+      }
+      const foodsHTML = allFoods.length > 0 ? `<p class="history-foods">🍴 ${allFoods.join(', ')}</p>` : "";
+      const card = document.createElement('div');
+      card.className = 'history-summary-card';
+      card.innerHTML = `
+        <div class="history-card-header"><span class="history-date">${dateLabel}</span></div>
+        <div class="history-card-body">
+          <div class="history-tags-row">${moodsHTML}</div>
+          <div class="history-tags-row">${symptomsHTML}</div>
+          ${foodsHTML}
+        </div>
+      `;
+      container.appendChild(card);
+    });
   }
 
   function renderTaskConsole(container, entry) {
@@ -1730,26 +2002,20 @@ document.addEventListener('DOMContentLoaded', () => {
       omega: dietData.weeklyGoals || {},
       sport: dietData.activityGoals || {}
     };
-
     const taskCard = document.createElement('div');
-    // On utilise des marges latérales négatives pour compenser le padding du parent (.content-area)
     taskCard.style.cssText = `
         background-color: #fdfaf5; border-radius: 25px; padding: 22px;
         margin: 0 -10px 25px -10px; border: 1px solid #f1ece4;
         box-shadow: 0 4px 12px rgba(0,0,0,0.02);
     `;
-
     const header = document.createElement('div');
     header.style.cssText = `display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;`;
     header.innerHTML = `<h3 style="margin:0; font-size:1.15rem; color:#5d5a55; font-weight:800;">Objectifs du jour</h3>`;
-
     const tabContainer = document.createElement('div');
     tabContainer.style.cssText = `display: flex; gap: 4px; background: #f1ece4; padding: 4px; border-radius: 14px;`;
-
     const tabs = [{ id: 'diet', icon: '🍽️' }, { id: 'omega', icon: '🌻' }, { id: 'sport', icon: '🏃' }];
     let currentTab = 'diet';
     const listBody = document.createElement('div');
-
     const renderList = (tabId) => {
       listBody.innerHTML = '';
       Object.entries(goals[tabId]).forEach(([taskText, isChecked]) => {
@@ -1767,7 +2033,6 @@ document.addEventListener('DOMContentLoaded', () => {
         listBody.appendChild(item);
       });
     };
-
     tabs.forEach(tab => {
       const btn = document.createElement('button');
       btn.innerHTML = tab.icon;
@@ -1788,7 +2053,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       tabContainer.appendChild(btn);
     });
-
     header.appendChild(tabContainer);
     taskCard.appendChild(header);
     taskCard.appendChild(listBody);
@@ -1800,6 +2064,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSettings();
   renderDailyNotes();
   renderDietTracking();
-  renderHistory();
+  renderRecipes();
+  renderHistoryStreaks();
+  renderHistoryGraph();
+  renderHistoryNotes();
   switchToTab(userSettings ? 'tab-daily-notes' : 'tab-settings');
 });

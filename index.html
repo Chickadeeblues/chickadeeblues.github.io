@@ -26,12 +26,39 @@
       <!-- app.js remplira dynamiquement -->
     </section>
 
+    <!-- Tab 3: Recettes -->
+    <section id="tab-recipes" class="tab-content" style="padding-top:20px;">
+      <div style="margin-bottom: 20px;">
+        <input type="text" id="main-search-bar" placeholder="Rechercher une recette ou un ingrédient..."
+               style="width: 100%; padding: 14px 20px; border-radius: 25px; border: none; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-family: 'Outfit'; font-weight: 600; outline: none; font-size:1rem;" />
+      </div>
+      <div id="recipe-results-container" style="display:flex; flex-direction:column; gap:15px; padding-bottom:20px;">
+      </div>
+    </section>
+
     <!-- Tab 3: History -->
     <section id="tab-history" class="tab-content">
-      <div class="placeholder-card">
-        <div class="icon-history">📊</div>
-        <h2>Historique</h2>
-        <p>Vos graphiques d'évolution apparaîtront ici.</p>
+      <h2 class="section-title" style="text-align: center; margin-bottom: 20px;">Mon Suivi</h2>
+
+      <div id="history-streaks-container" style="display:flex; justify-content:center; margin-bottom:20px;"></div>
+
+      <div class="card" style="padding: 15px; margin-bottom: 20px;">
+        <h3 style="font-size: 1rem; margin-bottom: 15px; color: var(--primary);">Évolution des douleurs</h3>
+        <div id="history-graph-container"
+             style="min-height: 150px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 10px;">
+          <p style="color: #94a3b8; font-size: 0.8rem;">Chargement du graphique...</p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; margin: 25px 0;">
+        <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+        <span
+                style="padding: 0 10px; color: #94a3b8; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Notes
+            Quotidiennes</span>
+        <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+      </div>
+
+      <div id="history-notes-container">
       </div>
     </section>
 
@@ -48,6 +75,9 @@
     </button>
     <button class="nav-item" data-target="tab-diet">
       <span>Diète</span>
+    </button>
+    <button class="nav-item" data-target="tab-recipes">
+      <span>Recettes</span>
     </button>
     <button class="nav-item" data-target="tab-history">
       <span>Historique</span>

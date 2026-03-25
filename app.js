@@ -545,7 +545,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultGoals = { "Boire 1.5 litre": false, "Une poignée d'amandes": false, "2 c. à s. de graines de chia": false, "2 c. à s. d'huile de noix": false };
     const weeklyGoals = { "300 gr. de poisson gras": false, "Pas de café": false, "Pas d'alcool": false };
     const activityGoals = { "5 min. cohérence cardiaque": false, "Exercices kiné": false, "30 min. de marche / piscine": false };
-    const activityWeeklyGoals = { "Une séance de sport (longue)": false };
 
     const defaultMealsData = {
       "Petit-déjeuner": { categories: { "Boisson": [], "Repas": [] }, digestionScale: null },
@@ -637,7 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return { ...baseColor, dotBg: baseColor.border, isGradient: false };
   }
-
 
   function showBubblyPopup(name, goal, color) {
 
@@ -1309,10 +1307,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsContainer = document.createElement('div');
     settingsContainer.style.cssText = 'display:flex; flex-direction:column; gap:15px; padding-bottom:30px;';
 
-    // 1. Cycle Menstruel Accordion
+    // --- 1. Cycle Menstruel Accordion ---
     const cycleDetails = document.createElement('details');
     cycleDetails.className = 'card meal-accordion-card';
-    if (!userSettings) cycleDetails.open = true; // Ouvert par défaut si pas de paramétrage
+    if (!userSettings) cycleDetails.open = true;
 
     const cycleSummary = document.createElement('summary');
     cycleSummary.style.cssText = 'font-weight:700; font-size:1.1rem; color:#5d5a55; display:flex; justify-content:space-between; align-items:center; outline:none; cursor:pointer; list-style:none; padding:10px 0;';
@@ -1340,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cycleDetails.appendChild(cycleContent);
     settingsContainer.appendChild(cycleDetails);
 
-    // 2. Suivi Alimentaire Accordion
+    // --- 2. Suivi Alimentaire Accordion ---
     const foodDetails = document.createElement('details');
     foodDetails.className = 'card meal-accordion-card';
 
@@ -1350,15 +1348,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const foodContent = document.createElement('div');
     foodContent.style.marginTop = '20px';
-
     foodContent.innerHTML = `
       <button id="btn-show-food-form" class="primary" style="width:100%; margin-bottom:15px; background:var(--bg-card); color:var(--primary); border:2px solid var(--primary);">+ Ajouter un aliment</button>
-
       <div id="new-food-form-container" style="display:none; background:#f8fafc; padding:20px; border-radius:20px; border:1px solid #e2e8f0;">
         <h4 style="margin-bottom:15px; color:#475569;">Création d'aliment</h4>
-
-        <input type="text" id="new-food-name" placeholder="Nom de l'aliment (ex: Pâtes de konjac)" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; font-weight:600;">
-
+        <input type="text" id="new-food-name" placeholder="Nom de l'aliment" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; font-weight:600;">
         <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Impact inflammatoire</label>
         <select id="new-food-type" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
           <option value="anti-inflammatoire">Anti-inflammatoire</option>
@@ -1366,8 +1360,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <option value="pro-inflammatoire">Pro-inflammatoire</option>
           <option value="inflammatoire">Inflammatoire</option>
         </select>
-
-        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Catégorie principale (Apport)</label>
+        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Catégorie principale</label>
         <select id="new-food-category" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
           <option value="legume">Légume</option>
           <option value="fruit">Fruit</option>
@@ -1377,14 +1370,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <option value="graine">Graine / Fruit sec</option>
           <option value="assaisonnement">Assaisonnement</option>
           <option value="boisson">Boisson</option>
-          <option value="autre">Autre (Snack, Plat préparé...)</option>
+          <option value="autre">Autre</option>
         </select>
-
         <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; font-weight:600; color:#475569;">
           <input type="checkbox" id="new-food-glutenfree" style="width:20px; height:20px; accent-color:var(--primary);">
           Sans gluten
         </label>
-
         <button id="btn-save-food" class="primary" style="width:100%;">Ajouter à la base de données</button>
       </div>
     `;
@@ -1393,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     foodDetails.appendChild(foodContent);
     settingsContainer.appendChild(foodDetails);
 
-    // 3. Mes Recettes Accordion
+    // --- 3. Mes Recettes Accordion ---
     const recipeSettingsDetails = document.createElement('details');
     recipeSettingsDetails.className = 'card meal-accordion-card';
 
@@ -1403,43 +1394,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const recipeSettingsContent = document.createElement('div');
     recipeSettingsContent.style.marginTop = '20px';
-
     recipeSettingsContent.innerHTML = `
       <button id="btn-show-recipe-form" class="primary" style="width:100%; margin-bottom:15px; background:var(--bg-card); color:var(--primary); border:2px solid var(--primary);">+ Créer une recette</button>
-
       <div id="new-recipe-form-container" style="display:none; background:#f8fafc; padding:20px; border-radius:20px; border:1px solid #e2e8f0;">
         <h4 style="margin-bottom:15px; color:#475569;">Nouvelle Recette</h4>
-
         <input type="text" id="recipe-title" placeholder="Nom de la recette" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; font-weight:600;">
-
         <select id="recipe-type" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
           <option value="Petit-déjeuner">Petit-déjeuner</option>
           <option value="Déjeuner" selected>Déjeuner</option>
           <option value="Dîner">Dîner</option>
           <option value="Collation / Goûter">Collation / Goûter</option>
-          <option value="Boisson / Smoothie">Boisson / Smoothie</option>
         </select>
-
         <input type="text" id="recipe-prep" placeholder="Temps (ex: 15 min)" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit';">
-
         <div style="display:flex; gap:10px; margin-bottom:15px;">
-          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
-            <input type="checkbox" id="recipe-gf"> Gluten Free
-          </label>
-          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
-            <input type="checkbox" id="recipe-vegan"> Vegan
-          </label>
-          <label style="flex:1; display:flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:600; color:#475569;">
-            <input type="checkbox" id="recipe-perfect"> Parfaite ✨
-          </label>
+          <label><input type="checkbox" id="recipe-gf"> GF</label>
+          <label><input type="checkbox" id="recipe-vegan"> Vegan</label>
+          <label><input type="checkbox" id="recipe-perfect"> Parfaite ✨</label>
         </div>
-
-        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Ingrédients (séparés par une virgule)</label>
-        <textarea id="recipe-ingredients" placeholder="Quinoa, Avocat, Citron..." style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:80px;"></textarea>
-
-        <label style="font-size:0.85rem; font-weight:700; color:#64748b; margin-bottom:5px; display:block;">Étapes (une par ligne)</label>
-        <textarea id="recipe-steps" placeholder="Étape 1 : Cuire...\nÉtape 2 : Couper..." style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:100px;"></textarea>
-
+        <textarea id="recipe-ingredients" placeholder="Ingrédients (virgule)" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:80px;"></textarea>
+        <textarea id="recipe-steps" placeholder="Étapes (une par ligne)" style="width:100%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #cbd5e1; font-family:'Outfit'; min-height:100px;"></textarea>
         <button id="btn-save-recipe" class="primary" style="width:100%;">Enregistrer la recette</button>
       </div>
     `;
@@ -1450,7 +1423,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tabSettings.appendChild(settingsContainer);
 
-    // Event Listeners for Cycle Settings
+    // --- LISTENERS (DÉLÉGATION ET ACTIONS) ---
+
+    // 1. Sauvegarde Cycle
     cycleContent.querySelector('#btn-save-setup').addEventListener('click', () => {
       userSettings = {
         cycleStart: document.getElementById('setup-date').value,
@@ -1463,10 +1438,9 @@ document.addEventListener('DOMContentLoaded', () => {
       renderDailyNotes();
     });
 
-    // Event Listeners for Food Customization
+    // 2. Gestion Aliment (Toggle Form et Save)
     const btnShowFoodForm = foodContent.querySelector('#btn-show-food-form');
     const foodFormContainer = foodContent.querySelector('#new-food-form-container');
-
     btnShowFoodForm.addEventListener('click', () => {
       const isHidden = foodFormContainer.style.display === 'none';
       foodFormContainer.style.display = isHidden ? 'block' : 'none';
@@ -1475,53 +1449,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     foodContent.querySelector('#btn-save-food').addEventListener('click', () => {
       const nameInput = document.getElementById('new-food-name');
-      const typeSelect = document.getElementById('new-food-type');
-      const catSelect = document.getElementById('new-food-category');
-      const gfCheck = document.getElementById('new-food-glutenfree');
-
       const nameVal = nameInput.value.trim();
       if (!nameVal) {
-        showSimplePopup("Erreur", "Veuillez renseigner le nom de l'aliment.", "#f43f5e");
+        showSimplePopup("Erreur", "Veuillez renseigner le nom.", "#f43f5e");
         return;
       }
-
-      // Vérifier si ça existe déjà (insensible à la casse)
-      const existing = foodDatabase.find(f => f.name.toLowerCase() === nameVal.toLowerCase());
-      if (existing) {
-        showSimplePopup("Information", "Cet aliment existe déjà dans la base !", "#facc15");
-        return;
-      }
-
-      // Création de l'objet
       const newFood = {
         name: nameVal,
-        type: typeSelect.value,
-        glutenfree: gfCheck.checked,
-        [catSelect.value]: true // Définit la propriété legume:true, ou proteine:true selon le choix
+        type: document.getElementById('new-food-type').value,
+        glutenfree: document.getElementById('new-food-glutenfree').checked,
+        [document.getElementById('new-food-category').value]: true
       };
-
-      // Sauvegarde dans le LocalStorage et dans la BDD active
       foodDatabase.push(newFood);
-
       let sysCustomFoods = JSON.parse(localStorage.getItem('endocuteCustomFoods')) || [];
       sysCustomFoods.push(newFood);
       localStorage.setItem('endocuteCustomFoods', JSON.stringify(sysCustomFoods));
-
-      showSimplePopup("Succès", `L'aliment "${nameVal}" a été ajouté !`, "#4ade80");
-
-      // Reset form
+      showSimplePopup("Succès", `"${nameVal}" ajouté !`, "#4ade80");
       nameInput.value = '';
-      typeSelect.value = 'neutre';
-      catSelect.value = 'legume';
-      gfCheck.checked = false;
       foodFormContainer.style.display = 'none';
       btnShowFoodForm.textContent = '+ Ajouter un aliment';
     });
 
-    // Event Listeners for Recipe Customization
+    // 3. Gestion Recette (Toggle Form et Save)
     const btnShowRecipeForm = recipeSettingsContent.querySelector('#btn-show-recipe-form');
     const recipeFormContainer = recipeSettingsContent.querySelector('#new-recipe-form-container');
-
     btnShowRecipeForm.addEventListener('click', () => {
       const isHidden = recipeFormContainer.style.display === 'none';
       recipeFormContainer.style.display = isHidden ? 'block' : 'none';
@@ -1530,49 +1481,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     recipeSettingsContent.querySelector('#btn-save-recipe').addEventListener('click', () => {
       const title = document.getElementById('recipe-title').value.trim();
-      const type = document.getElementById('recipe-type').value;
-      const prep = document.getElementById('recipe-prep').value.trim();
-      const isGf = document.getElementById('recipe-gf').checked;
-      const isVegan = document.getElementById('recipe-vegan').checked;
-      const isPerfect = document.getElementById('recipe-perfect').checked;
-      const ingreds = document.getElementById('recipe-ingredients').value.split(',').map(i => i.trim()).filter(i => i);
-      const steps = document.getElementById('recipe-steps').value.split('\n').map(s => s.trim()).filter(s => s);
-
-      if (!title || ingreds.length === 0 || steps.length === 0) {
-        showSimplePopup("Erreur", "Veuillez remplir le titre, ingrédients et étapes.", "#f43f5e");
+      if (!title) {
+        showSimplePopup("Erreur", "Veuillez remplir le titre.", "#f43f5e");
         return;
       }
-
       const newRecipe = {
         id: Date.now(),
         title,
-        type,
-        prepTime: prep || "N/A",
-        isGlutenFree: isGf,
-        isVegan: isVegan,
-        isPerfectRecipe: isPerfect,
-        ingredients: ingreds,
-        steps: steps
+        type: document.getElementById('recipe-type').value,
+        prepTime: document.getElementById('recipe-prep').value || "N/A",
+        isGlutenFree: document.getElementById('recipe-gf').checked,
+        isVegan: document.getElementById('recipe-vegan').checked,
+        isPerfectRecipe: document.getElementById('recipe-perfect').checked,
+        ingredients: document.getElementById('recipe-ingredients').value.split(',').map(i => i.trim()).filter(i => i),
+        steps: document.getElementById('recipe-steps').value.split('\n').map(s => s.trim()).filter(s => s)
       };
-
       customRecipes.push(newRecipe);
       fullRecipeDatabase = [...staticRecipes, ...customRecipes];
       saveData();
-
       showSimplePopup("Succès", `Recette "${title}" enregistrée !`, "#4ade80");
-
-      // Reset form
-      document.getElementById('recipe-title').value = '';
-      document.getElementById('recipe-prep').value = '';
-      document.getElementById('recipe-gf').checked = false;
-      document.getElementById('recipe-vegan').checked = false;
-      document.getElementById('recipe-perfect').checked = false;
-      document.getElementById('recipe-ingredients').value = '';
-      document.getElementById('recipe-steps').value = '';
       recipeFormContainer.style.display = 'none';
       btnShowRecipeForm.textContent = '+ Créer une recette';
     });
-  }
+
+  } // <--- C'EST CETTE ACCOLADE QUI FERME LA FONCTION PRINCIPALE
 
   function renderDailyNotes() {
     if (!tabDailyNotes) return;
@@ -1914,44 +1846,215 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderHistoryGraph() {
-    const container = document.getElementById('history-graph-container');
-    if (!container) return;
-    container.innerHTML = "";
-    const last6Days = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      last6Days.push(d.toLocaleDateString('sv-SE'));
-    }
-    last6Days.forEach(dateStr => {
-      const entry = appData.history.find(e => e.date === dateStr);
-      let level = 0;
-      if (entry && entry.symptomLevels) {
-        const levels = Object.values(entry.symptomLevels).filter(v => v !== null);
-        level = levels.length > 0 ? Math.max(...levels) : 0;
-      }
-      const dayName = new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
-      const barWrapper = document.createElement('div');
-      barWrapper.className = 'graph-bar-wrapper';
-      const heightPercent = (level / 5) * 100;
-      barWrapper.innerHTML = `
-        <div class="graph-bar-container">
-          <div class="graph-bar-fill" style="height: ${heightPercent}%; background: ${getBarColor(level)}">
-            ${level > 0 ? `<span class="bar-value">${level}</span>` : ''}
-          </div>
-        </div>
-        <span class="graph-day-label">${dayName}</span>
-      `;
-      container.appendChild(barWrapper);
-    });
-  }
+      const container = document.getElementById('history-graph-container');
+      if (!container) return;
 
-  function getBarColor(level) {
-    if (level >= 4) return '#f43f5e';
-    if (level >= 2) return '#fb923c';
-    if (level > 0) return '#4ade80';
-    return '#e2e8f0';
-  }
+      container.innerHTML = "";
+      // On s'assure que le container est en position relative pour le bouton en haut à droite
+      container.style.cssText = "background:transparent; padding:0; position:relative; display:block;";
+
+      // --- 1. BOUTON LÉGENDE (EN HAUT À DROITE) ---
+      const helpBtn = document.createElement('div');
+        helpBtn.innerHTML = "?";
+        helpBtn.style.cssText = `
+          position: absolute;
+          top: -33px;
+          right: 0;
+              width: 22px;
+              height: 22px;
+              background: #f1f5f9;
+              color: #94a3b8;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 13px;
+              font-weight: bold;
+              cursor: pointer;
+              z-index: 10;
+              transition: all 0.2s ease;
+              border: 1.5px solid #e2e8f0;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+              outline: none;
+              -webkit-tap-highlight-color: transparent;
+              user-select: none;
+            `;
+
+       helpBtn.onclick = (e) => {
+       e.preventDefault();
+        const legendContent = `
+          <div style="text-align:left; font-size:14px;">
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+              <div style="width:12px; height:12px; background:linear-gradient(#bef264, #166534); border-radius:3px; margin-right:10px;"></div>
+              <span><b>Habitudes :</b> Score quotidien (0-100%)</span>
+            </div>
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+              <div style="width:12px; height:2px; background:#60a5fa; margin-right:10px; border-top:2px dashed #60a5fa;"></div>
+              <span><b>Fatigue</b)</span>
+            </div>
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+              <div style="width:12px; height:2px; background:#f43f5e; margin-right:10px; border-top:2px dashed #f43f5e;"></div>
+              <span><b>Douleurs</b>)</span>
+            </div>
+            <div style="display:flex; align-items:center; margin-bottom:10px;">
+              <div style="width:12px; height:2px; background:#fb923c; margin-right:10px; border-top:2px dashed #fb923c;"></div>
+              <span><b>Inconfort digestif</b)</span>
+            </div>
+            <p style="font-size:12px; color:#94a3b8; margin-top:15px; border-top:1px solid #f1f5f9; pt:10px;">
+              Les lignes horizontales grises représentent les niveaux d'intensité de 1 à 5.
+            </p>
+          </div>
+        `;
+        showSimplePopup("Légende", legendContent, "#166534");
+      };
+      container.appendChild(helpBtn);
+
+      // --- 2. SETUP DU GRAPHIQUE ---
+      const graphHeight = 150;
+      const graphInner = document.createElement('div');
+      graphInner.style.cssText = `display:flex; align-items:flex-end; height:${graphHeight}px; width:100%; gap:6px; position:relative; z-index:1;`;
+
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svgLayer = document.createElementNS(svgNS, "svg");
+      svgLayer.style.cssText = `position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; overflow:visible;`;
+
+      // Animation de l'étoile
+      const styleId = 'history-graph-styles';
+      if (!document.getElementById(styleId)) {
+        const styleBlock = document.createElement('style');
+        styleBlock.id = styleId;
+        styleBlock.textContent = `
+          @keyframes starPopIn {
+            0% { transform: translate(-50%, 0) scale(0); opacity: 0; }
+            60% { transform: translate(-50%, -18px) scale(1.4); opacity: 1; }
+            100% { transform: translate(-50%, -12px) scale(1); opacity: 1; }
+          }
+          .gamification-star { animation: starPopIn 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards; animation-delay: 1s; }
+        `;
+        document.head.appendChild(styleBlock);
+      }
+
+      // LIGNES D'ÉCHELLE (Niveaux 1 à 5)
+      for (let lvl = 1; lvl <= 5; lvl++) {
+        const yPos = graphHeight - (((lvl - 1) / 4) * (graphHeight * 0.75) + (graphHeight * 0.12));
+        const gridLine = document.createElement('div');
+        gridLine.style.cssText = `position: absolute; left: 0; width: 100%; top: ${yPos}px; height: 1px; background: #f1f5f9; z-index: 0;`;
+        container.appendChild(gridLine);
+      }
+
+      const symptomsConfig = [
+        { key: 'fatigue', color: '#60a5fa' },
+        { key: 'pelvic', color: '#f43f5e' },
+        { key: 'discomfort', color: '#fb923c' }
+      ];
+
+      const pointsData = { fatigue: [], pelvic: [], discomfort: [] };
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toLocaleDateString('sv-SE');
+        const entry = appData.history.find(e => e.date === dateStr);
+
+        let scoreTotal = 0;
+        // ... Calcul du scoreTotal (logique existante) ...
+        if (entry && entry.diet) {
+          let totalChecked = 0, totalPossible = 0;
+          const taskPaths = [entry.diet.goals, entry.diet.weeklyGoals, entry.diet.activityGoals];
+          taskPaths.forEach(path => { if (path) { const t = Object.values(path); totalChecked += t.filter(v=>v===true).length; totalPossible += t.length; }});
+          if (totalPossible > 0) scoreTotal += (totalChecked / totalPossible) * 75;
+          let veg = 0;
+          if (entry.diet.meals) {
+            Object.values(entry.diet.meals).forEach(m => {
+              if (m.categories) Object.values(m.categories).flat().forEach(item => {
+                const f = foodDatabase.find(food => food.name === (typeof item === 'object' ? item.name : item));
+                if (f && (f.legume || f.fruit)) veg += (typeof item === 'object' ? (parseInt(item.qty) || 1) : 1);
+              });
+            });
+          }
+          scoreTotal += Math.min((veg / 5) * 25, 25);
+        }
+
+        const dayWrapper = document.createElement('div');
+        dayWrapper.className = "graph-day-column";
+        dayWrapper.style.cssText = `flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; position:relative; z-index:2;`;
+
+        const barFill = document.createElement('div');
+        barFill.style.cssText = `
+          width:100%; height:0%; background:linear-gradient(180deg, #bef264 0%, #166534 100%);
+          border-radius:2px 2px 0 0; transition:height 0.8s ease-out; opacity:0.6;
+          border-bottom: 1px solid white; box-sizing: border-box; position:relative;
+        `;
+
+        // Étoile de récompense si score max
+        if (scoreTotal >= 100) {
+          const star = document.createElement('div');
+          star.className = 'gamification-star';
+          star.innerHTML = '⭐';
+          star.style.cssText = "position:absolute; top:0; left:50%; font-size:16px; opacity:0; z-index:10; pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,0.2);";
+          barFill.appendChild(star);
+        }
+
+        const baseLine = document.createElement('div');
+        baseLine.style.cssText = `width:100%; height:2px; background:${scoreTotal > 0 ? '#166534' : '#e2e8f0'}; border-radius:1px;`;
+
+        dayWrapper.appendChild(barFill);
+        dayWrapper.appendChild(baseLine);
+        graphInner.appendChild(dayWrapper);
+
+        setTimeout(() => { barFill.style.height = scoreTotal > 0 ? `${Math.max(scoreTotal, 5)}%` : '0%'; }, (6 - i) * 60);
+
+        if (entry && entry.symptomLevels) {
+          symptomsConfig.forEach(s => {
+            if (entry.symptomLevels[s.key]) {
+              const val = entry.symptomLevels[s.key];
+              const yPos = graphHeight - (((val - 1) / 4) * (graphHeight * 0.75) + (graphHeight * 0.12));
+              pointsData[s.key].push({ dayIndex: 6-i, y: yPos });
+            }
+          });
+        }
+      }
+
+      container.appendChild(graphInner);
+      graphInner.appendChild(svgLayer);
+
+      // --- TRACÉ DES LIGNES ET POINTS ---
+      setTimeout(() => {
+        const dayCols = graphInner.querySelectorAll('.graph-day-column');
+        if (!dayCols.length) return;
+        const colW = dayCols[0].offsetWidth;
+        const gap = 6;
+        const fullStep = colW + gap;
+
+        symptomsConfig.forEach(s => {
+          const pts = pointsData[s.key];
+          if (pts.length < 2) return;
+          const coords = pts.map(p => ({ x: p.dayIndex * fullStep + (colW / 2), y: p.y }));
+
+          let d = `M ${coords[0].x - (colW / 2)} ${coords[0].y} L ${coords[0].x} ${coords[0].y}`;
+          for (let i = 0; i < coords.length - 1; i++) {
+            const midX = (coords[i].x + coords[i + 1].x) / 2;
+            d += ` C ${midX} ${coords[i].y}, ${midX} ${coords[i + 1].y}, ${coords[i + 1].x} ${coords[i + 1].y}`;
+          }
+
+          const path = document.createElementNS(svgNS, "path");
+          path.setAttribute("d", d);
+          path.setAttribute("stroke", s.color);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke-width", "1.5");
+          path.setAttribute("opacity", "0.9");
+          path.setAttribute("stroke-dasharray", "4, 4");
+          svgLayer.appendChild(path);
+
+          coords.forEach(coord => {
+            const dot = document.createElementNS(svgNS, "circle");
+            dot.setAttribute("cx", coord.x); dot.setAttribute("cy", coord.y); dot.setAttribute("r", "2.5");
+            dot.setAttribute("fill", s.color); dot.setAttribute("stroke", "white"); dot.setAttribute("stroke-width", "1");
+            svgLayer.appendChild(dot);
+          });
+        });
+      }, 300);
+    }
 
   function renderHistoryNotes() {
       const container = document.getElementById('history-notes-container');
@@ -2065,69 +2168,77 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderTaskConsole(container, entry) {
-    const dietData = getDietEntryForDate(entry);
+    // 1. On s'assure que la structure existe DIRECTEMENT dans l'entry (l'historique)
+    if (!entry.diet) entry.diet = { meals: {}, goals: {} };
+    if (!entry.goals) entry.goals = {}; // On centralise ici pour le graphique
+
+    // On synchronise les références pour que modifier 'goals' modifie 'entry'
     const goals = {
-      diet: dietData.goals || {},
-      omega: dietData.weeklyGoals || {},
-      sport: dietData.activityGoals || {}
+      diet: entry.diet.goals || {},
+      omega: entry.diet.weeklyGoals || {}, // Garde tes noms actuels
+      sport: entry.diet.activityGoals || {}
     };
+
     const taskCard = document.createElement('div');
-    taskCard.style.cssText = `
-        background-color: #fdfaf5; border-radius: 25px; padding: 22px;
-        margin: 0 -10px 25px -10px; border: 1px solid #f1ece4;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    `;
+    taskCard.style.cssText = `background-color: #fdfaf5; border-radius: 25px; padding: 22px; margin: 0 -10px 25px -10px; border: 1px solid #f1ece4; box-shadow: 0 4px 12px rgba(0,0,0,0.02);`;
+
     const header = document.createElement('div');
     header.style.cssText = `display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;`;
     header.innerHTML = `<h3 style="margin:0; font-size:1.15rem; color:#5d5a55; font-weight:800;">Objectifs du jour</h3>`;
+
     const tabContainer = document.createElement('div');
     tabContainer.style.cssText = `display: flex; gap: 4px; background: #f1ece4; padding: 4px; border-radius: 14px;`;
+
     const tabs = [{ id: 'diet', icon: '🍽️' }, { id: 'omega', icon: '🌻' }, { id: 'sport', icon: '🏃' }];
     let currentTab = 'diet';
     const listBody = document.createElement('div');
+
     const renderList = (tabId) => {
       listBody.innerHTML = '';
-      Object.entries(goals[tabId]).forEach(([taskText, isChecked]) => {
+      const currentGoals = goals[tabId];
+
+      Object.entries(currentGoals).forEach(([taskText, isChecked]) => {
         const item = document.createElement('label');
         item.style.cssText = `display:flex; align-items:center; gap:14px; margin-bottom:14px; cursor:pointer;`;
         item.innerHTML = `
                 <input type="checkbox" ${isChecked ? 'checked' : ''} style="width:22px; height:22px; accent-color:#9d4edd; cursor:pointer;">
                 <span style="font-size:1rem; font-weight:500; color:#5d5a55; ${isChecked ? 'text-decoration:line-through; opacity:0.3;' : ''}">${taskText}</span>
             `;
+
         item.querySelector('input').onchange = (e) => {
-          goals[tabId][taskText] = e.target.checked;
-          saveData();
+
+          if (tabId === 'diet') entry.diet.goals[taskText] = e.target.checked;
+          if (tabId === 'omega') entry.diet.weeklyGoals[taskText] = e.target.checked;
+          if (tabId === 'sport') entry.diet.activityGoals[taskText] = e.target.checked;
+
+          saveData(); // Sauvegarde l'état global de appData
           renderList(tabId);
+
+          if (typeof renderHistoryGraph === 'function') renderHistoryGraph();
         };
         listBody.appendChild(item);
       });
     };
     tabs.forEach(tab => {
-      const btn = document.createElement('button');
-      btn.innerHTML = tab.icon;
-      btn.style.cssText = `
-            background: ${tab.id === currentTab ? 'white' : 'transparent'};
-            border: none; border-radius: 10px; cursor: pointer; padding: 8px 14px;
-            transition: all 0.2s ease; font-size: 1.2rem;
-            box-shadow: ${tab.id === currentTab ? '0 2px 6px rgba(0,0,0,0.06)' : 'none'};
-        `;
-      btn.onclick = () => {
-        currentTab = tab.id;
-        tabContainer.querySelectorAll('button').forEach((b, i) => {
-          const isActive = tabs[i].id === currentTab;
-          b.style.background = isActive ? 'white' : 'transparent';
-          b.style.boxShadow = isActive ? '0 2px 6px rgba(0,0,0,0.06)' : 'none';
-        });
-        renderList(currentTab);
-      };
-      tabContainer.appendChild(btn);
-    });
-    header.appendChild(tabContainer);
-    taskCard.appendChild(header);
-    taskCard.appendChild(listBody);
-    container.appendChild(taskCard);
-    renderList(currentTab);
-  }
+        const btn = document.createElement('button');
+        btn.innerHTML = tab.icon;
+        btn.style.cssText = `background: ${tab.id === currentTab ? 'white' : 'transparent'}; border: none; border-radius: 10px; cursor: pointer; padding: 8px 14px; transition: all 0.2s ease; font-size: 1.2rem;`;
+        btn.onclick = () => {
+          currentTab = tab.id;
+          tabContainer.querySelectorAll('button').forEach((b, i) => {
+            b.style.background = tabs[i].id === currentTab ? 'white' : 'transparent';
+          });
+          renderList(currentTab);
+        };
+        tabContainer.appendChild(btn);
+      });
+
+      header.appendChild(tabContainer);
+      taskCard.appendChild(header);
+      taskCard.appendChild(listBody);
+      container.appendChild(taskCard);
+      renderList(currentTab);
+    }
 
   // --- INITIALISATION ---
   renderSettings();

@@ -1,85 +1,99 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>EndoCute - Suivi du cycle & Symptômes</title>
+  <title>EndoCute</title>
 
-  <link rel="stylesheet" href="style.css">
-  <script src="app.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="foodData.js"></script>
+
+  <style>
+    /* 1. STRUCTURE GLOBALE */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background: #f0f2f5;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    header {
+      background: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #9d4edd;
+      height: 65px;
+      box-sizing: border-box;
+    }
+
+    /* 2. ZONE DE SWIPE */
+    #swipe-zone {
+      height: calc(100vh - 135px);
+      overflow-y: auto;
+      touch-action: pan-y;
+    }
+
+    /* 3. ÉLÉMENTS UI */
+    .univ-btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; background: white; font-weight: bold; font-size: 0.85rem; }
+    .univ-btn.active { background: #9d4edd; color: white; border-color: #9d4edd; }
+
+    footer {
+      position: fixed; bottom: 0; width: 100%; height: 70px;
+      background: white; border-top: 1px solid #ddd;
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      z-index: 100;
+    }
+
+    .tab-btn { padding: 10px 15px; border: none; background: #eee; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
+    .tab-btn.active { background: #9d4edd; color: white; }
+
+    .card { background: white; margin: 15px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); user-select: none; }
+
+    input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+    /* Boutons de gestion des données */
+    .btn-data-action {
+      display: block; width: 100%; padding: 14px; margin-bottom: 10px;
+      border: 1px solid #f1f5f9; border-radius: 12px;
+      background: #f8fafc; color: #475569;
+      font-weight: 600; font-size: 0.9rem; text-align: left;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-data-action:active { background: #f1f5f9; }
+
+    .btn-danger {
+      background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6; margin-top: 10px;
+    }
+    .btn-danger:active { background: #ffe4e6; }
+
+    .btn-save { background: #9d4edd; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+
+    /* Nettoyage des flèches par défaut de l'accordéon */
+    summary { list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+  </style>
 </head>
-
 <body>
-<div id="app" class="app-container">
 
-  <!-- MAIN CONTENT AREA -->
-  <main class="content-area">
-    <!-- Tab 1: Daily Notes -->
-    <section id="tab-daily-notes" class="tab-content active">
-      <!-- app.js remplira dynamiquement -->
-    </section>
+<header>
+  <b style="color:#9d4edd">EndoCute</b>
+  <div>
+    <button class="univ-btn active" id="btn-notes">Notes</button>
+    <button class="univ-btn" id="btn-recipes">Recettes</button>
+    <button class="univ-btn" id="btn-settings">Paramètres</button>
+  </div>
+</header>
 
-    <!-- Tab 2: Diète -->
-    <section id="tab-diet" class="tab-content">
-      <!-- app.js remplira dynamiquement -->
-    </section>
+<main id="swipe-zone">
+  <div id="zone-contenu">
+  </div>
+</main>
 
-    <!-- Tab 3: Recettes -->
-    <section id="tab-recipes" class="tab-content" style="padding-top:20px;">
-      <div style="margin-bottom: 20px;">
-        <input type="text" id="main-search-bar" placeholder="Rechercher une recette ou un ingrédient..."
-               style="width: 100%; padding: 14px 20px; border-radius: 25px; border: none; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-family: 'Outfit'; font-weight: 600; outline: none; font-size:1rem;" />
-      </div>
-      <div id="recipe-results-container" style="display:flex; flex-direction:column; gap:15px; padding-bottom:20px;">
-      </div>
-    </section>
+<footer id="barre-bas"></footer>
 
-    <!-- Tab 3: History -->
-    <section id="tab-history" class="tab-content">
-      <h2 class="section-title" style="text-align: center; margin-bottom: 20px;">Mon Suivi</h2>
-
-      <div id="history-streaks-container" style="display:flex; justify-content:center; margin-bottom:20px;"></div>
-
-      <div class="card" style="padding: 15px; margin-bottom: 20px;">
-        <h3 style="font-size: 1rem; margin-bottom: 15px; color: var(--primary);">État des 7 derniers jours</h3>
-        <div id="history-graph-container"
-             style="min-height: 150px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 10px;">
-          <p style="color: #94a3b8; font-size: 0.8rem;">Chargement du graphique...</p>
-        </div>
-      </div>
-
-      <div id="history-notes-container">
-      </div>
-    </section>
-
-    <!-- Tab 4: Settings -->
-    <section id="tab-settings" class="tab-content">
-      <!-- app.js remplira dynamiquement -->
-    </section>
-  </main>
-
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-target="tab-daily-notes">
-      <span>Notes</span>
-    </button>
-    <button class="nav-item" data-target="tab-diet">
-      <span>Diète</span>
-    </button>
-    <button class="nav-item" data-target="tab-recipes">
-      <span>Recettes</span>
-    </button>
-    <button class="nav-item" data-target="tab-history">
-      <span>Historique</span>
-    </button>
-    <button class="nav-item" data-target="tab-settings">
-      <span>Paramètres</span>
-    </button>
-  </nav>
-
-</div>
+<script src="app.js"></script>
 </body>
-
 </html>
